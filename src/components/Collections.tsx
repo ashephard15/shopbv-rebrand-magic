@@ -3,24 +3,34 @@ import { Button } from "@/components/ui/button";
 const Collections = () => {
   const collections = [
     {
-      title: "Lippies",
-      description: "From glossy to matte, find your perfect pout.",
-      link: "#lips"
+      title: "Makeup & Nails",
+      description: "From bold lips to perfect tips, own your look.",
+      link: "#makeup-nails"
     },
     {
-      title: "Face",
-      description: "Foundation, blush, and everything in between.",
-      link: "#face"
-    },
-    {
-      title: "Eyes",
-      description: "Make a statement with stunning eye looks.",
-      link: "#eyes"
-    },
-    {
-      title: "Skincare",
+      title: "Skin Care",
       description: "Nourish and glow from within.",
       link: "#skincare"
+    },
+    {
+      title: "Hair Care",
+      description: "Luscious locks deserve the best.",
+      link: "#haircare"
+    },
+    {
+      title: "Fragrance",
+      description: "Make your signature scent unforgettable.",
+      link: "#fragrance"
+    },
+    {
+      title: "Body Care",
+      description: "Smooth, soft, and totally you.",
+      link: "#bodycare"
+    },
+    {
+      title: "Tools & Brushes",
+      description: "The right tools for flawless finishes.",
+      link: "#tools-brushes"
     }
   ];
 
@@ -36,7 +46,7 @@ const Collections = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {collections.map((collection) => (
             <div 
               key={collection.title}
