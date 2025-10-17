@@ -64,7 +64,7 @@ const Collections = () => {
               key={collection.title}
               className="group relative overflow-hidden rounded-xl bg-card shadow-md hover:shadow-xl transition-all duration-300"
             >
-              <div className="aspect-[4/5] overflow-hidden bg-secondary/30">
+              <div className="aspect-[3/4] overflow-hidden bg-secondary/30">
                 <img 
                   src={collection.image}
                   alt={`${collection.title} Collection`}
