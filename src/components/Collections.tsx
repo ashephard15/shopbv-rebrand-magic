@@ -68,10 +68,10 @@ const Collections = () => {
                 <img 
                   src={collection.image}
                   alt={`${collection.title} Collection`}
-                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
-              <div className="p-4 space-y-2">
+              <div className="px-4 pb-4 pt-2 space-y-2">
                 <h3 className="font-serif text-2xl font-bold text-foreground">
                   {collection.title}
                 </h3>
