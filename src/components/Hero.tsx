@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import heroGloss from "@/assets/hero-gloss.jpg";
-import heroGlow from "@/assets/hero-glow.jpg";
-import heroRio from "@/assets/hero-rio.jpg";
+import heroGloss from "@/assets/hero-gloss.png";
+import heroGlow from "@/assets/hero-glow.png";
+import heroRio from "@/assets/hero-rio.png";
 
 const Hero = () => {
   return (
