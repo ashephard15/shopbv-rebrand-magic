@@ -64,11 +64,11 @@ const Collections = () => {
               key={collection.title}
               className="group relative overflow-hidden rounded-xl bg-card shadow-md hover:shadow-xl transition-all duration-300"
             >
-              <div className="aspect-[4/5] overflow-hidden">
+              <div className="aspect-[4/5] overflow-hidden bg-secondary/30">
                 <img 
                   src={collection.image}
                   alt={`${collection.title} Collection`}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="p-6 space-y-3">
