@@ -1,35 +1,47 @@
 import { Button } from "@/components/ui/button";
+import makeupNails from "@/assets/collection-makeup-nails.jpg";
+import skincare from "@/assets/collection-skincare.jpg";
+import haircare from "@/assets/collection-haircare.jpg";
+import fragrance from "@/assets/collection-fragrance.jpg";
+import bodycare from "@/assets/collection-bodycare.jpg";
+import toolsBrushes from "@/assets/collection-tools-brushes.jpg";
 
 const Collections = () => {
   const collections = [
     {
       title: "Makeup & Nails",
       description: "From bold lips to perfect tips, own your look.",
+      image: makeupNails,
       link: "#makeup-nails"
     },
     {
       title: "Skin Care",
       description: "Nourish and glow from within.",
+      image: skincare,
       link: "#skincare"
     },
     {
       title: "Hair Care",
       description: "Luscious locks deserve the best.",
+      image: haircare,
       link: "#haircare"
     },
     {
       title: "Fragrance",
       description: "Make your signature scent unforgettable.",
+      image: fragrance,
       link: "#fragrance"
     },
     {
       title: "Body Care",
       description: "Smooth, soft, and totally you.",
+      image: bodycare,
       link: "#bodycare"
     },
     {
       title: "Tools & Brushes",
       description: "The right tools for flawless finishes.",
+      image: toolsBrushes,
       link: "#tools-brushes"
     }
   ];
@@ -50,18 +62,24 @@ const Collections = () => {
           {collections.map((collection) => (
             <div 
               key={collection.title}
-              className="group relative overflow-hidden rounded-xl bg-card p-8 shadow-md hover:shadow-xl transition-all duration-300"
+              className="group relative overflow-hidden rounded-xl bg-card shadow-md hover:shadow-xl transition-all duration-300"
             >
-              <div className="space-y-4">
-                <h3 className="font-serif text-3xl font-bold text-foreground">
+              <div className="aspect-[4/5] overflow-hidden">
+                <img 
+                  src={collection.image}
+                  alt={`${collection.title} Collection`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="p-6 space-y-3">
+                <h3 className="font-serif text-2xl font-bold text-foreground">
                   {collection.title}
                 </h3>
                 <p className="font-sans text-muted-foreground">
                   {collection.description}
                 </p>
                 <Button 
-                  variant="outline" 
-                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-sans font-semibold"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-sans font-semibold"
                 >
                   Shop {collection.title}
                 </Button>
