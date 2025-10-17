@@ -71,7 +71,7 @@ const Collections = () => {
                   className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
-              <div className="p-6 pt-4 space-y-3">
+              <div className="p-4 space-y-2">
                 <h3 className="font-serif text-2xl font-bold text-foreground">
                   {collection.title}
                 </h3>
