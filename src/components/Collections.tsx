@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import makeupNails from "@/assets/collection-makeup-nails-new.png";
 import skincare from "@/assets/collection-skincare-new.png";
 import haircare from "@/assets/collection-haircare-new.png";
-import fragrance from "@/assets/collection-fragrance.jpg";
+import fragrance from "@/assets/collection-fragrance-new.png";
 import bodycare from "@/assets/collection-bodycare.jpg";
 import toolsBrushes from "@/assets/collection-tools-brushes.jpg";
 
