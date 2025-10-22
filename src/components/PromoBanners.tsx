@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Sparkles, Gift, Tag } from "lucide-react";
+import promoGiftSets from "@/assets/promo-gift-sets.png";
 
 const PromoBanners = () => {
   const promos = [
@@ -52,6 +53,18 @@ const PromoBanners = () => {
                 className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${promo.gradient} p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in`}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
+                {/* Background image for gift sets card */}
+                {promo.id === 2 && (
+                  <div className="absolute inset-0 z-0">
+                    <img
+                      src={promoGiftSets}
+                      alt="Gift Sets"
+                      className="w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-600/90 via-pink-600/90 to-rose-600/90" />
+                  </div>
+                )}
+                
                 <div className="relative z-10 flex flex-col h-full min-h-[280px]">
                   <div className="mb-4">
                     <Icon className={`h-8 w-8 ${promo.textColor} opacity-80`} />
