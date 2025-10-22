@@ -18,9 +18,9 @@ serve(async (req) => {
     const { items } = await req.json();
     console.log('Creating Wix checkout for items:', items);
 
-    // Create checkout in Wix
-    const response = await fetch(
-      `https://www.wixapis.com/stores/v2/checkouts`,
+    // Step 1: Create checkout with line items
+    const checkoutResponse = await fetch(
+      `https://www.wixapis.com/ecom/v1/checkouts`,
       {
         method: 'POST',
         headers: {
@@ -30,25 +30,64 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           lineItems: items.map((item: any) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            options: item.options || {}
+            catalogReference: {
+              catalogItemId: item.productId,
+              appId: '215238eb-22a5-4c36-9e7b-e7c08025e04e',
+              options: item.options || {}
+            },
+            quantity: item.quantity
           })),
           channelType: 'WEB'
         })
       }
     );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Wix checkout API error:', response.status, errorText);
-      throw new Error(`Wix checkout API error: ${response.status} - ${errorText}`);
+    if (!checkoutResponse.ok) {
+      const errorText = await checkoutResponse.text();
+      console.error('Wix checkout API error:', checkoutResponse.status, errorText);
+      throw new Error(`Wix checkout API error: ${checkoutResponse.status} - ${errorText}`);
     }
 
-    const data = await response.json();
-    console.log('Checkout created successfully:', data.checkout?.id);
+    const checkoutData = await checkoutResponse.json();
+    const checkoutId = checkoutData.checkout.id;
+    console.log('Checkout created with ID:', checkoutId);
 
-    return new Response(JSON.stringify(data), {
+    // Step 2: Create redirect session
+    const redirectResponse = await fetch(
+      `https://www.wixapis.com/redirect-session/v1/redirect-session`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': WIX_API_KEY!,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ecomCheckout: {
+            checkoutId: checkoutId
+          },
+          callbacks: {
+            postFlowUrl: req.headers.get('origin') || 'https://your-site.com'
+          }
+        })
+      }
+    );
+
+    if (!redirectResponse.ok) {
+      const errorText = await redirectResponse.text();
+      console.error('Wix redirect API error:', redirectResponse.status, errorText);
+      throw new Error(`Wix redirect API error: ${redirectResponse.status} - ${errorText}`);
+    }
+
+    const redirectData = await redirectResponse.json();
+    const checkoutUrl = redirectData.redirectSession.fullUrl;
+    console.log('Successfully created checkout URL');
+
+    return new Response(JSON.stringify({ 
+      checkout: {
+        checkoutId,
+        checkoutUrl
+      }
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

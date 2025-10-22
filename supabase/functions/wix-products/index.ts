@@ -17,9 +17,9 @@ serve(async (req) => {
   try {
     console.log('Fetching products from Wix...');
     
-    // Wix Stores API endpoint for products
+    // Wix Stores V3 API endpoint for products
     const response = await fetch(
-      `https://www.wixapis.com/stores/v1/products/query`,
+      `https://www.wixapis.com/stores/v3/products/query`,
       {
         method: 'POST',
         headers: {
@@ -29,9 +29,9 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           query: {
+            filter: {},
             paging: {
-              limit: 100,
-              offset: 0
+              limit: 100
             }
           }
         })

@@ -60,8 +60,7 @@ export async function createWixCheckout(items: WixCartItem[]): Promise<string> {
 
     if (error) throw error;
 
-    // Wix returns a checkout URL or checkout ID
-    return data.checkout?.checkoutUrl || data.checkout?.id;
+    return data.checkout?.checkoutUrl;
   } catch (error) {
     console.error('Error creating Wix checkout:', error);
     throw error;
