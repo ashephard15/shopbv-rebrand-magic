@@ -33,7 +33,7 @@ const PromoBanners = () => {
       subtitle: "Find your perfect fragrance match",
       description: "Premium perfumes and colognes for every personality.",
       cta: "Discover Now",
-      link: "/products?category=fragrance",
+      link: "/fragrance-quiz",
       gradient: "from-purple-600 via-pink-500 to-rose-500",
       textColor: "text-white",
       icon: Tag,
