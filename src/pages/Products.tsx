@@ -25,11 +25,28 @@ const Products = () => {
       const price = parseFloat(product.node.priceRange.minVariantPrice.amount);
       
       // Price filter
-      if (
-        price < filters.priceRange[0] ||
-        price > filters.priceRange[1]
-      ) {
+      if (price < filters.priceRange[0] || price > filters.priceRange[1]) {
         return false;
+      }
+
+      // Category filter
+      if (filters.categories.length > 0) {
+        const productType = product.node.productType?.toLowerCase() || '';
+        const productTitle = product.node.title.toLowerCase();
+        const hasMatchingCategory = filters.categories.some(category => 
+          productType.includes(category.toLowerCase()) || 
+          productTitle.includes(category.toLowerCase())
+        );
+        if (!hasMatchingCategory) return false;
+      }
+
+      // Benefits filter (check tags)
+      if (filters.benefits.length > 0) {
+        const productTags = product.node.tags?.map(tag => tag.toLowerCase()) || [];
+        const hasMatchingBenefit = filters.benefits.some(benefit =>
+          productTags.includes(benefit.toLowerCase())
+        );
+        if (!hasMatchingBenefit) return false;
       }
 
       return true;
@@ -146,7 +163,7 @@ const Products = () => {
                       key={product.node.id}
                       className="group relative bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-shadow"
                     >
-                      <Link to={`/product/${product.node.handle}`}>
+                      <Link to={`/products/${product.node.handle}`}>
                         <div className="aspect-square overflow-hidden bg-secondary/20">
                           {mainImage ? (
                             <img
