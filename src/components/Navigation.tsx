@@ -12,6 +12,9 @@ const Navigation = () => {
             <a href="/" className="font-serif text-muted-foreground hover:text-foreground transition-colors">
               Home
             </a>
+            <a href="/products" className="font-serif text-muted-foreground hover:text-foreground transition-colors">
+              Products
+            </a>
             <a href="#catalog" className="font-serif text-muted-foreground hover:text-foreground transition-colors">
               Catalog
             </a>
