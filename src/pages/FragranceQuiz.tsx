@@ -59,16 +59,6 @@ const FragranceQuiz = () => {
         { text: "Winter - elegant and mysterious", value: "sophisticated" },
       ],
     },
-    {
-      id: 4,
-      question: "Your signature scent would be...",
-      options: [
-        { text: "Fruity and exotic", value: "tropical" },
-        { text: "Vanilla and caramel", value: "warm" },
-        { text: "Citrus and herbs", value: "fresh" },
-        { text: "Woody and floral", value: "sophisticated" },
-      ],
-    },
   ];
 
   const fragranceResults: Record<string, FragranceResult> = {
