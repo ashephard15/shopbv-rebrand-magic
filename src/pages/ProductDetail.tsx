@@ -161,11 +161,28 @@ const ProductDetail = () => {
               </div>
 
               {/* Price */}
-              <div className="flex items-baseline gap-2 mb-6">
-                <span className="text-3xl font-bold">
-                  ${parseFloat(price.amount).toFixed(2)}
-                </span>
-                <span className="text-muted-foreground">{price.currencyCode}</span>
+              <div className="mb-6 space-y-3">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold">
+                    ${parseFloat(price.amount).toFixed(2)}
+                  </span>
+                  <span className="text-muted-foreground">{price.currencyCode}</span>
+                </div>
+                
+                {/* Shop Pay Installments Message */}
+                <div className="flex items-start gap-2 p-3 bg-secondary/30 rounded-lg border border-border">
+                  <svg className="w-10 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 80 20" fill="none">
+                    <path d="M12.24 5.28c-1.32 0-2.28.36-2.88.96-.6.6-.84 1.44-.72 2.52h5.16c-.12-1.08-.36-1.92-.96-2.52-.6-.6-1.56-.96-2.6-.96zm4.44 8.76c-.96.96-2.4 1.44-4.32 1.44-1.92 0-3.36-.48-4.32-1.44-.96-.96-1.44-2.4-1.44-4.32 0-1.92.48-3.36 1.44-4.32.96-.96 2.4-1.44 4.32-1.44s3.36.48 4.32 1.44c.96.96 1.44 2.4 1.44 4.32 0 1.92-.48 3.36-1.44 4.32z" fill="currentColor"/>
+                    <path d="M28.8 3.84c-1.44 0-2.64.48-3.6 1.44-.96.96-1.44 2.4-1.44 4.32 0 1.92.48 3.36 1.44 4.32.96.96 2.16 1.44 3.6 1.44 1.2 0 2.16-.36 2.88-1.08v.84h2.4V.6h-2.4v4.32c-.72-.72-1.68-1.08-2.88-1.08zm.48 9.72c-.96 0-1.68-.36-2.16-.96-.48-.6-.72-1.44-.72-2.52s.24-1.92.72-2.52c.48-.6 1.2-.96 2.16-.96.96 0 1.68.36 2.16.96.48.6.72 1.44.72 2.52s-.24 1.92-.72 2.52c-.48.6-1.2.96-2.16.96z" fill="currentColor"/>
+                    <path d="M43.2 3.84c-1.92 0-3.36.48-4.32 1.44-.96.96-1.44 2.4-1.44 4.32 0 1.92.48 3.36 1.44 4.32.96.96 2.4 1.44 4.32 1.44 1.92 0 3.36-.48 4.32-1.44.96-.96 1.44-2.4 1.44-4.32 0-1.92-.48-3.36-1.44-4.32-.96-.96-2.4-1.44-4.32-1.44zm2.16 8.76c-.48.6-1.2.96-2.16.96-.96 0-1.68-.36-2.16-.96-.48-.6-.72-1.44-.72-2.52s.24-1.92.72-2.52c.48-.6 1.2-.96 2.16-.96.96 0 1.68.36 2.16.96.48.6.72 1.44.72 2.52s-.24 1.92-.72 2.52z" fill="currentColor"/>
+                    <path d="M58.8 3.84c-1.92 0-3.36.48-4.32 1.44-.96.96-1.44 2.4-1.44 4.32 0 1.92.48 3.36 1.44 4.32.96.96 2.4 1.44 4.32 1.44 1.44 0 2.64-.36 3.6-1.08v.84h2.4V4.08h-2.4v.84c-.96-.72-2.16-1.08-3.6-1.08zm.48 9.72c-.96 0-1.68-.36-2.16-.96-.48-.6-.72-1.44-.72-2.52s.24-1.92.72-2.52c.48-.6 1.2-.96 2.16-.96.96 0 1.68.36 2.16.96.48.6.72 1.44.72 2.52s-.24 1.92-.72 2.52c-.48.6-1.2.96-2.16.96z" fill="currentColor"/>
+                    <path d="M72 4.08h-2.64l-2.76 6.96-2.76-6.96h-2.88l4.32 10.56h2.4L72 4.08z" fill="currentColor"/>
+                  </svg>
+                  <div className="text-sm">
+                    <p className="font-medium">Pay over time for orders over $35.00 with Shop Pay.</p>
+                    <button className="text-muted-foreground hover:underline mt-1">Learn more</button>
+                  </div>
+                </div>
               </div>
             </div>
 
