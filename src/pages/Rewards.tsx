@@ -254,8 +254,7 @@ const Rewards = () => {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white/10 rounded-full px-8"
+                className="border-2 border-white bg-transparent text-white hover:bg-white hover:text-purple-600 rounded-full px-8"
                 asChild
               >
                 <Link to="/products">Start Shopping</Link>
