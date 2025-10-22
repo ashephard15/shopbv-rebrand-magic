@@ -21,7 +21,7 @@ const Navigation = () => {
               <img 
                 src={logo} 
                 alt="The Beauty Vault" 
-                className="h-20 w-auto"
+                className="h-28 w-auto"
               />
             </Link>
 
