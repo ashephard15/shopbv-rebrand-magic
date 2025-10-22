@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Heart, ChevronLeft, Star, Package, Store, Truck } from "lucide-react";
+import { Heart, ChevronLeft, Star, Package, Truck } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import { Separator } from "@/components/ui/separator";
 
@@ -184,20 +184,13 @@ const ProductDetail = () => {
 
             {/* Delivery Options */}
             <div className="space-y-4">
-              <h3 className="font-medium text-lg">Pickup and delivery options</h3>
-              <div className="grid grid-cols-3 gap-3">
+              <h3 className="font-medium text-lg">Delivery options</h3>
+              <div className="grid grid-cols-2 gap-3">
                 <button className="border border-border rounded-sm p-4 hover:border-foreground transition-colors text-center">
                   <Truck className="w-6 h-6 mx-auto mb-2 text-primary" />
                   <p className="font-medium text-sm mb-1">Ship</p>
                   <p className="text-xs text-muted-foreground">
                     Free standard shipping over $35
-                  </p>
-                </button>
-                <button className="border border-border rounded-sm p-4 hover:border-foreground transition-colors text-center">
-                  <Store className="w-6 h-6 mx-auto mb-2 text-primary" />
-                  <p className="font-medium text-sm mb-1">Pickup</p>
-                  <p className="text-xs text-muted-foreground">
-                    Free in-store pick up
                   </p>
                 </button>
                 <button className="border border-border rounded-sm p-4 hover:border-foreground transition-colors text-center">
