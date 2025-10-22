@@ -9,65 +9,47 @@ import ProductFilters, { FilterState } from "@/components/ProductFilters";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { WixProduct } from "@/lib/wix";
 
 const Products = () => {
   const { products, loading, error } = useProducts();
   const addItem = useCartStore(state => state.addItem);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
-    priceRange: [0, 100],
+    priceRange: [0, 500],
     brands: [],
     benefits: [],
   });
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const price = parseFloat(product.node.priceRange.minVariantPrice.amount);
+      const price = parseFloat(product.price.price);
       
       // Price filter
       if (price < filters.priceRange[0] || price > filters.priceRange[1]) {
         return false;
       }
 
-      // Category filter
-      if (filters.categories.length > 0) {
-        const productType = product.node.productType?.toLowerCase() || '';
-        const productTitle = product.node.title.toLowerCase();
-        const hasMatchingCategory = filters.categories.some(category => 
-          productType.includes(category.toLowerCase()) || 
-          productTitle.includes(category.toLowerCase())
-        );
-        if (!hasMatchingCategory) return false;
-      }
-
-      // Benefits filter (check tags)
-      if (filters.benefits.length > 0) {
-        const productTags = product.node.tags?.map(tag => tag.toLowerCase()) || [];
-        const hasMatchingBenefit = filters.benefits.some(benefit =>
-          productTags.includes(benefit.toLowerCase())
-        );
-        if (!hasMatchingBenefit) return false;
-      }
-
       return true;
     });
   }, [products, filters]);
 
-  const handleAddToCart = (product: typeof products[0]) => {
-    const variant = product.node.variants.edges[0]?.node;
-    if (!variant) return;
-
-    addItem({
+  const handleAddToCart = (product: WixProduct) => {
+    const cartItem = {
       product,
-      variantId: variant.id,
-      variantTitle: variant.title,
-      price: variant.price,
+      productId: product.id,
+      variantTitle: undefined,
+      price: {
+        amount: product.price.price,
+        currency: product.price.currency
+      },
       quantity: 1,
-      selectedOptions: variant.selectedOptions
-    });
+      selectedOptions: {}
+    };
 
+    addItem(cartItem);
     toast.success("Added to cart", {
-      description: `${product.node.title} has been added to your cart`,
+      description: `${product.name} has been added to your cart.`,
       position: "top-center"
     });
   };
@@ -148,63 +130,42 @@ const Products = () => {
               <div className="text-center py-16">
                 <p className="text-muted-foreground mb-4">No products found</p>
                 <p className="text-sm text-muted-foreground">
-                  Start by creating products in your Shopify store
+                  Try adjusting your filters or check back later
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => {
-                  const mainImage = product.node.images.edges[0]?.node;
-                  const price = product.node.priceRange.minVariantPrice;
-                  const hasVariants = product.node.variants.edges.length > 1;
+                  const firstImage = product.media?.items?.[0]?.image;
 
                   return (
-                    <div
-                      key={product.node.id}
-                      className="group relative bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-shadow"
-                    >
-                      <Link to={`/products/${product.node.handle}`}>
-                        <div className="aspect-square overflow-hidden bg-secondary/20">
-                          {mainImage ? (
+                    <div key={product.id} className="group">
+                      <Link to={`/product/${product.slug}`}>
+                        <div className="aspect-square bg-secondary/20 rounded-lg overflow-hidden mb-4">
+                          {firstImage && (
                             <img
-                              src={mainImage.url}
-                              alt={mainImage.altText || product.node.title}
+                              src={firstImage.url}
+                              alt={firstImage.altText || product.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                              No Image
-                            </div>
                           )}
                         </div>
-                        
-                        <div className="p-4">
-                          <h3 className="font-semibold mb-2 line-clamp-2">{product.node.title}</h3>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-lg font-bold">
-                              ${parseFloat(price.amount).toFixed(2)}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {price.currencyCode}
-                            </span>
-                          </div>
-                          {hasVariants && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {product.node.variants.edges.length} variants available
-                            </p>
-                          )}
-                        </div>
+                        <h3 className="font-medium mb-2 group-hover:text-primary transition-colors">
+                          {product.name}
+                        </h3>
+                        <p className="text-xl font-bold mb-3">
+                          ${parseFloat(product.price.price).toFixed(2)} {product.price.currency}
+                        </p>
                       </Link>
-                      
-                      <div className="p-4 pt-0">
-                        <Button 
-                          onClick={() => handleAddToCart(product)}
-                          className="w-full"
-                          size="sm"
-                        >
-                          Add to Cart
-                        </Button>
-                      </div>
+                      <Button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleAddToCart(product);
+                        }}
+                        className="w-full"
+                      >
+                        Add to Cart
+                      </Button>
                     </div>
                   );
                 })}

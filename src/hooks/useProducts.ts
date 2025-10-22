@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
-import { fetchProducts, ShopifyProduct } from '@/lib/shopify';
+import { fetchWixProducts, WixProduct } from '@/lib/wix';
 
 export function useProducts() {
-  const [products, setProducts] = useState<ShopifyProduct[]>([]);
+  const [products, setProducts] = useState<WixProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const shopifyProducts = await fetchProducts(50);
-        setProducts(shopifyProducts);
+        const wixProducts = await fetchWixProducts();
+        setProducts(wixProducts);
         setLoading(false);
       } catch (err) {
         console.error('Error loading products:', err);
-        setError('Failed to load products from Shopify');
+        setError('Failed to load products from Wix');
         setLoading(false);
       }
     };
@@ -25,14 +25,12 @@ export function useProducts() {
   return { products, loading, error };
 }
 
-export function getProductsByCategory(products: ShopifyProduct[], category: string): ShopifyProduct[] {
+export function getProductsByCategory(products: WixProduct[], category: string): WixProduct[] {
   if (category === 'all') return products;
-  // For Shopify products, you might need to add product type or tags to filter
   return products;
 }
 
-export function getUniqueCategories(products: ShopifyProduct[]): string[] {
-  // Extract unique categories from Shopify product types
+export function getUniqueCategories(products: WixProduct[]): string[] {
   const categories = new Set<string>();
   return ['all', ...Array.from(categories).sort()];
 }

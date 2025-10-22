@@ -3,10 +3,10 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Heart, ChevronLeft, Star, Package, Truck } from "lucide-react";
-import { fetchProductByHandle } from "@/lib/shopify";
+import { Heart, ChevronLeft } from "lucide-react";
+import { fetchWixProducts, WixProduct } from "@/lib/wix";
 import { Separator } from "@/components/ui/separator";
-import { useCartStore, createStorefrontCheckout, CartItem } from "@/stores/cartStore";
+import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -14,9 +14,8 @@ const ProductDetail = () => {
   const { handle } = useParams();
   const navigate = useNavigate();
   const addItem = useCartStore(state => state.addItem);
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<WixProduct | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
@@ -25,8 +24,9 @@ const ProductDetail = () => {
       
       try {
         setLoading(true);
-        const data = await fetchProductByHandle(handle);
-        setProduct(data);
+        const products = await fetchWixProducts();
+        const foundProduct = products.find((p: WixProduct) => p.slug === handle);
+        setProduct(foundProduct || null);
       } catch (error) {
         console.error('Error loading product:', error);
       } finally {
@@ -66,29 +66,23 @@ const ProductDetail = () => {
     );
   }
 
-  const images = product.images.edges.map((edge: any) => edge.node);
-  const selectedVariant = product.variants.edges[selectedVariantIndex]?.node;
-  const price = selectedVariant?.price || product.priceRange.minVariantPrice;
+  const images = product.media?.items?.map(item => item.image).filter(Boolean) || [];
+  const price = product.price;
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
-
-    // Create a ShopifyProduct structure for the cart
-    const cartProduct = {
-      node: product
-    };
-
     addItem({
-      product: cartProduct,
-      variantId: selectedVariant.id,
-      variantTitle: selectedVariant.title,
-      price: selectedVariant.price,
+      product,
+      productId: product.id,
+      price: {
+        amount: price.price,
+        currency: price.currency
+      },
       quantity: 1,
-      selectedOptions: selectedVariant.selectedOptions
+      selectedOptions: {}
     });
 
     toast.success("Added to cart", {
-      description: `${product.title} has been added to your cart`,
+      description: `${product.name} has been added to your cart`,
       position: "top-center"
     });
   };
@@ -98,45 +92,45 @@ const ProductDetail = () => {
       <Navigation />
       
       <main className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <Link to="/" className="hover:text-foreground">Home</Link>
-          <span>/</span>
-          <Link to="/products" className="hover:text-foreground">Products</Link>
-          <span>/</span>
-          <span className="text-foreground">{product.title}</span>
-        </div>
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/products")}
+          className="mb-6"
+        >
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Back to Products
+        </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Image Gallery */}
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+          {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-square rounded-lg overflow-hidden bg-secondary/20">
+            <div className="aspect-square bg-secondary/20 rounded-lg overflow-hidden">
               {images[selectedImage] ? (
                 <img
                   src={images[selectedImage].url}
-                  alt={images[selectedImage].altText || product.title}
+                  alt={images[selectedImage].altText || product.name}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                  No Image
+                <div className="w-full h-full flex items-center justify-center">
+                  <p className="text-muted-foreground">No image available</p>
                 </div>
               )}
             </div>
             
             {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
-                {images.map((image: any, idx: number) => (
+              <div className="grid grid-cols-4 gap-4">
+                {images.map((image, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`aspect-square rounded-md overflow-hidden border-2 transition-colors ${
-                      selectedImage === idx ? 'border-primary' : 'border-border'
+                    className={`aspect-square bg-secondary/20 rounded-md overflow-hidden border-2 transition-colors ${
+                      selectedImage === idx ? 'border-primary' : 'border-transparent'
                     }`}
                   >
                     <img
                       src={image.url}
-                      alt={image.altText || `${product.title} ${idx + 1}`}
+                      alt={`${product.name} ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -148,154 +142,72 @@ const ProductDetail = () => {
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
-              
-              {/* Rating placeholder */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                  ))}
-                </div>
-                <span className="text-sm text-muted-foreground">5.0 (Excellent)</span>
-              </div>
+              <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
+              {product.description && (
+                <p className="text-muted-foreground">{product.description}</p>
+              )}
+            </div>
 
-              {/* Price */}
-              <div className="mb-6 space-y-3">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold">
-                    ${parseFloat(price.amount).toFixed(2)}
-                  </span>
-                  <span className="text-muted-foreground">{price.currencyCode}</span>
-                </div>
-                
-                {/* Shop Pay Installments Message */}
-                <div className="flex items-start gap-2 p-3 bg-secondary/30 rounded-lg border border-border">
-                  <svg className="w-10 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 80 20" fill="none">
-                    <path d="M12.24 5.28c-1.32 0-2.28.36-2.88.96-.6.6-.84 1.44-.72 2.52h5.16c-.12-1.08-.36-1.92-.96-2.52-.6-.6-1.56-.96-2.6-.96zm4.44 8.76c-.96.96-2.4 1.44-4.32 1.44-1.92 0-3.36-.48-4.32-1.44-.96-.96-1.44-2.4-1.44-4.32 0-1.92.48-3.36 1.44-4.32.96-.96 2.4-1.44 4.32-1.44s3.36.48 4.32 1.44c.96.96 1.44 2.4 1.44 4.32 0 1.92-.48 3.36-1.44 4.32z" fill="currentColor"/>
-                    <path d="M28.8 3.84c-1.44 0-2.64.48-3.6 1.44-.96.96-1.44 2.4-1.44 4.32 0 1.92.48 3.36 1.44 4.32.96.96 2.16 1.44 3.6 1.44 1.2 0 2.16-.36 2.88-1.08v.84h2.4V.6h-2.4v4.32c-.72-.72-1.68-1.08-2.88-1.08zm.48 9.72c-.96 0-1.68-.36-2.16-.96-.48-.6-.72-1.44-.72-2.52s.24-1.92.72-2.52c.48-.6 1.2-.96 2.16-.96.96 0 1.68.36 2.16.96.48.6.72 1.44.72 2.52s-.24 1.92-.72 2.52c-.48.6-1.2.96-2.16.96z" fill="currentColor"/>
-                    <path d="M43.2 3.84c-1.92 0-3.36.48-4.32 1.44-.96.96-1.44 2.4-1.44 4.32 0 1.92.48 3.36 1.44 4.32.96.96 2.4 1.44 4.32 1.44 1.92 0 3.36-.48 4.32-1.44.96-.96 1.44-2.4 1.44-4.32 0-1.92-.48-3.36-1.44-4.32-.96-.96-2.4-1.44-4.32-1.44zm2.16 8.76c-.48.6-1.2.96-2.16.96-.96 0-1.68-.36-2.16-.96-.48-.6-.72-1.44-.72-2.52s.24-1.92.72-2.52c.48-.6 1.2-.96 2.16-.96.96 0 1.68.36 2.16.96.48.6.72 1.44.72 2.52s-.24 1.92-.72 2.52z" fill="currentColor"/>
-                    <path d="M58.8 3.84c-1.92 0-3.36.48-4.32 1.44-.96.96-1.44 2.4-1.44 4.32 0 1.92.48 3.36 1.44 4.32.96.96 2.4 1.44 4.32 1.44 1.44 0 2.64-.36 3.6-1.08v.84h2.4V4.08h-2.4v.84c-.96-.72-2.16-1.08-3.6-1.08zm.48 9.72c-.96 0-1.68-.36-2.16-.96-.48-.6-.72-1.44-.72-2.52s.24-1.92.72-2.52c.48-.6 1.2-.96 2.16-.96.96 0 1.68.36 2.16.96.48.6.72 1.44.72 2.52s-.24 1.92-.72 2.52c-.48.6-1.2.96-2.16.96z" fill="currentColor"/>
-                    <path d="M72 4.08h-2.64l-2.76 6.96-2.76-6.96h-2.88l4.32 10.56h2.4L72 4.08z" fill="currentColor"/>
-                  </svg>
-                  <div className="text-sm">
-                    <p className="font-medium">Pay over time for orders over $35.00 with Shop Pay.</p>
-                    <button className="text-muted-foreground hover:underline mt-1">Learn more</button>
-                  </div>
-                </div>
+            {/* Price */}
+            <div className="mb-6 space-y-3">
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold">
+                  ${parseFloat(price.price).toFixed(2)}
+                </span>
+                <span className="text-muted-foreground">{price.currency}</span>
               </div>
             </div>
 
-            {/* Variants */}
-            {product.variants.edges.length > 1 && (
-              <div>
-                <h3 className="font-semibold mb-3">Select Option</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.variants.edges.map((variantEdge: any, idx: number) => {
-                    const variant = variantEdge.node;
-                    return (
-                      <Button
-                        key={variant.id}
-                        variant={selectedVariantIndex === idx ? "default" : "outline"}
-                        onClick={() => setSelectedVariantIndex(idx)}
-                        disabled={!variant.availableForSale}
-                      >
-                        {variant.selectedOptions.map((opt: any) => opt.value).join(' / ')}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            <Separator />
 
-            {/* Add to Cart and Buy Now */}
-            <div className="space-y-3">
+            {/* Add to Cart */}
+            <div className="space-y-4">
               <Button 
-                size="lg" 
-                className="w-full"
                 onClick={handleAddToCart}
-                disabled={!selectedVariant?.availableForSale}
+                className="w-full" 
+                size="lg"
               >
-                {selectedVariant?.availableForSale ? 'Add to Cart' : 'Out of Stock'}
+                Add to Cart
               </Button>
               
-              {/* Shop Pay Button */}
               <Button 
-                size="lg" 
-                className="w-full bg-[#5A31F4] hover:bg-[#4621D6] text-white font-semibold"
-                onClick={async () => {
-                  if (!product || !selectedVariant) return;
-                  
-                  const cartItem: CartItem = {
-                    product: { node: product } as any,
-                    variantId: selectedVariant.id,
-                    variantTitle: selectedVariant.title,
-                    price: selectedVariant.price,
-                    quantity: 1,
-                    selectedOptions: selectedVariant.selectedOptions
-                  };
-                  
-                  try {
-                    setLoading(true);
-                    const checkoutUrl = await createStorefrontCheckout([cartItem]);
-                    window.open(checkoutUrl, '_blank');
-                  } catch (error) {
-                    console.error('Shop Pay checkout failed:', error);
-                    toast.error('Failed to create checkout');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                disabled={!selectedVariant?.availableForSale || loading}
+                variant="outline" 
+                className="w-full"
+                size="lg"
               >
-                Buy with <span className="ml-2 font-bold tracking-wide">Shop</span>
-                <span className="ml-1 px-2 py-0.5 bg-white text-[#5A31F4] rounded font-bold text-sm">Pay</span>
-              </Button>
-              
-              <Button size="lg" variant="outline" className="w-full">
                 <Heart className="w-4 h-4 mr-2" />
                 Add to Wishlist
               </Button>
             </div>
 
-            <Separator />
-
-            {/* Delivery Options */}
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Truck className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold">Free Shipping</p>
-                  <p className="text-sm text-muted-foreground">
-                    On orders over $35
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <Package className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold">Fast Delivery</p>
-                  <p className="text-sm text-muted-foreground">
-                    2-5 business days
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Description */}
-            {product.description && (
-              <div>
-                <h3 className="font-semibold mb-3">Product Description</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {product.description}
-                </p>
+            {/* Stock Status */}
+            {product.stock && (
+              <div className="flex items-center gap-2 text-sm">
+                {product.stock.inStock ? (
+                  <>
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    <span className="text-muted-foreground">In Stock</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-2 h-2 bg-red-500 rounded-full" />
+                    <span className="text-muted-foreground">Out of Stock</span>
+                  </>
+                )}
               </div>
             )}
           </div>
         </div>
+
+        {/* Additional Info */}
+        {product.description && (
+          <div className="mt-16 space-y-6">
+            <h2 className="text-2xl font-bold">Product Details</h2>
+            <div className="prose max-w-none">
+              <p className="text-muted-foreground">{product.description}</p>
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />

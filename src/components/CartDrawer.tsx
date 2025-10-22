@@ -76,24 +76,24 @@ export const CartDrawer = () => {
               <div className="flex-1 overflow-y-auto pr-2 min-h-0">
                 <div className="space-y-4">
                   {items.map((item) => (
-                    <div key={item.variantId} className="flex gap-4 p-2">
+                    <div key={item.productId} className="flex gap-4 p-2">
                       <div className="w-16 h-16 bg-secondary/20 rounded-md overflow-hidden flex-shrink-0">
-                        {item.product.node.images?.edges?.[0]?.node && (
+                        {item.product.media?.items?.[0]?.image && (
                           <img
-                            src={item.product.node.images.edges[0].node.url}
-                            alt={item.product.node.title}
+                            src={item.product.media.items[0].image.url}
+                            alt={item.product.name}
                             className="w-full h-full object-cover"
                           />
                         )}
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium truncate">{item.product.node.title}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {item.selectedOptions.map(option => option.value).join(' • ')}
-                        </p>
+                        <h4 className="font-medium truncate">{item.product.name}</h4>
+                        {item.variantTitle && (
+                          <p className="text-sm text-muted-foreground">{item.variantTitle}</p>
+                        )}
                         <p className="font-semibold">
-                          {item.price.currencyCode} ${parseFloat(item.price.amount).toFixed(2)}
+                          {item.price.currency} ${parseFloat(item.price.amount).toFixed(2)}
                         </p>
                       </div>
                       
@@ -102,7 +102,7 @@ export const CartDrawer = () => {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6"
-                          onClick={() => removeItem(item.variantId)}
+                          onClick={() => removeItem(item.productId)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -112,7 +112,7 @@ export const CartDrawer = () => {
                             variant="outline"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
@@ -121,7 +121,7 @@ export const CartDrawer = () => {
                             variant="outline"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -136,7 +136,7 @@ export const CartDrawer = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total</span>
                   <span className="text-xl font-bold">
-                    {items[0]?.price.currencyCode || 'USD'} ${totalPrice.toFixed(2)}
+                    {items[0]?.price.currency || 'USD'} ${totalPrice.toFixed(2)}
                   </span>
                 </div>
                 
@@ -154,7 +154,7 @@ export const CartDrawer = () => {
                   ) : (
                     <>
                       <ExternalLink className="w-4 h-4 mr-2" />
-                      Checkout with Shopify
+                      Checkout with Wix
                     </>
                   )}
                 </Button>

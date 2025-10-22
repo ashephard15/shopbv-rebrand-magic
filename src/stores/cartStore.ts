@@ -1,20 +1,17 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { ShopifyProduct, storefrontApiRequest } from '@/lib/shopify';
+import { createWixCheckout, WixProduct } from '@/lib/wix';
 
 export interface CartItem {
-  product: ShopifyProduct;
-  variantId: string;
-  variantTitle: string;
+  product: WixProduct;
+  productId: string;
+  variantTitle?: string;
   price: {
     amount: string;
-    currencyCode: string;
+    currency: string;
   };
   quantity: number;
-  selectedOptions: Array<{
-    name: string;
-    value: string;
-  }>;
+  selectedOptions?: Record<string, string>;
 }
 
 interface CartStore {
@@ -24,89 +21,13 @@ interface CartStore {
   isLoading: boolean;
   
   addItem: (item: CartItem) => void;
-  updateQuantity: (variantId: string, quantity: number) => void;
-  removeItem: (variantId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (productId: string) => void;
   clearCart: () => void;
   setCartId: (cartId: string) => void;
   setCheckoutUrl: (url: string) => void;
   setLoading: (loading: boolean) => void;
   createCheckout: () => Promise<void>;
-}
-
-const CART_CREATE_MUTATION = `
-  mutation cartCreate($input: CartInput!) {
-    cartCreate(input: $input) {
-      cart {
-        id
-        checkoutUrl
-        totalQuantity
-        cost {
-          totalAmount {
-            amount
-            currencyCode
-          }
-        }
-        lines(first: 100) {
-          edges {
-            node {
-              id
-              quantity
-              merchandise {
-                ... on ProductVariant {
-                  id
-                  title
-                  price {
-                    amount
-                    currencyCode
-                  }
-                  product {
-                    title
-                    handle
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      userErrors {
-        field
-        message
-      }
-    }
-  }
-`;
-
-export async function createStorefrontCheckout(items: CartItem[]): Promise<string> {
-  try {
-    const lines = items.map(item => ({
-      quantity: item.quantity,
-      merchandiseId: item.variantId,
-    }));
-
-    const cartData = await storefrontApiRequest(CART_CREATE_MUTATION, {
-      input: {
-        lines,
-      },
-    });
-
-    if (cartData.data.cartCreate.userErrors.length > 0) {
-      throw new Error(`Cart creation failed: ${cartData.data.cartCreate.userErrors.map((e: any) => e.message).join(', ')}`);
-    }
-
-    const cart = cartData.data.cartCreate.cart;
-    
-    if (!cart.checkoutUrl) {
-      throw new Error('No checkout URL returned from Shopify');
-    }
-
-    const url = new URL(cart.checkoutUrl);
-    url.searchParams.set('channel', 'online_store');
-    return url.toString();
-  } catch (error) {
-    console.error('Error creating storefront checkout:', error);
-    throw error;
-  }
 }
 
 export const useCartStore = create<CartStore>()(
@@ -119,12 +40,12 @@ export const useCartStore = create<CartStore>()(
 
       addItem: (item) => {
         const { items } = get();
-        const existingItem = items.find(i => i.variantId === item.variantId);
+        const existingItem = items.find(i => i.productId === item.productId);
         
         if (existingItem) {
           set({
             items: items.map(i =>
-              i.variantId === item.variantId
+              i.productId === item.productId
                 ? { ...i, quantity: i.quantity + item.quantity }
                 : i
             )
@@ -134,22 +55,22 @@ export const useCartStore = create<CartStore>()(
         }
       },
 
-      updateQuantity: (variantId, quantity) => {
+      updateQuantity: (productId, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(variantId);
+          get().removeItem(productId);
           return;
         }
         
         set({
           items: get().items.map(item =>
-            item.variantId === variantId ? { ...item, quantity } : item
+            item.productId === productId ? { ...item, quantity } : item
           )
         });
       },
 
-      removeItem: (variantId) => {
+      removeItem: (productId) => {
         set({
-          items: get().items.filter(item => item.variantId !== variantId)
+          items: get().items.filter(item => item.productId !== productId)
         });
       },
 
@@ -167,10 +88,16 @@ export const useCartStore = create<CartStore>()(
 
         setLoading(true);
         try {
-          const checkoutUrl = await createStorefrontCheckout(items);
+          const wixItems = items.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            options: item.selectedOptions
+          }));
+          
+          const checkoutUrl = await createWixCheckout(wixItems);
           setCheckoutUrl(checkoutUrl);
         } catch (error) {
-          console.error('Failed to create checkout:', error);
+          console.error('Failed to create Wix checkout:', error);
           throw error;
         } finally {
           setLoading(false);
@@ -178,7 +105,7 @@ export const useCartStore = create<CartStore>()(
       }
     }),
     {
-      name: 'shopify-cart',
+      name: 'wix-cart',
       storage: createJSONStorage(() => localStorage),
     }
   )
