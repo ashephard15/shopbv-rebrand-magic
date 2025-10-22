@@ -77,7 +77,7 @@ const CART_CREATE_MUTATION = `
   }
 `;
 
-async function createStorefrontCheckout(items: CartItem[]): Promise<string> {
+export async function createStorefrontCheckout(items: CartItem[]): Promise<string> {
   try {
     const lines = items.map(item => ({
       quantity: item.quantity,

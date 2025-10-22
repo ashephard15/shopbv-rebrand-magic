@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, ChevronLeft, Star, Package, Truck } from "lucide-react";
 import { fetchProductByHandle } from "@/lib/shopify";
 import { Separator } from "@/components/ui/separator";
-import { useCartStore } from "@/stores/cartStore";
+import { useCartStore, createStorefrontCheckout, CartItem } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -191,7 +191,7 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Add to Cart */}
+            {/* Add to Cart and Buy Now */}
             <div className="space-y-3">
               <Button 
                 size="lg" 
@@ -201,6 +201,45 @@ const ProductDetail = () => {
               >
                 {selectedVariant?.availableForSale ? 'Add to Cart' : 'Out of Stock'}
               </Button>
+              
+              {/* Shop Pay Button */}
+              <Button 
+                size="lg" 
+                className="w-full bg-[#5A31F4] hover:bg-[#4621D6] text-white"
+                onClick={async () => {
+                  if (!product || !selectedVariant) return;
+                  
+                  const cartItem: CartItem = {
+                    product: { node: product } as any,
+                    variantId: selectedVariant.id,
+                    variantTitle: selectedVariant.title,
+                    price: selectedVariant.price,
+                    quantity: 1,
+                    selectedOptions: selectedVariant.selectedOptions
+                  };
+                  
+                  try {
+                    setLoading(true);
+                    const checkoutUrl = await createStorefrontCheckout([cartItem]);
+                    window.open(checkoutUrl, '_blank');
+                  } catch (error) {
+                    console.error('Shop Pay checkout failed:', error);
+                    toast.error('Failed to create checkout');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={!selectedVariant?.availableForSale || loading}
+              >
+                <svg className="w-16 h-4 mr-2" viewBox="0 0 80 20" fill="none">
+                  <path d="M12.24 5.28c-1.32 0-2.28.36-2.88.96-.6.6-.84 1.44-.72 2.52h5.16c-.12-1.08-.36-1.92-.96-2.52-.6-.6-1.56-.96-2.6-.96zm4.44 8.76c-.96.96-2.4 1.44-4.32 1.44-1.92 0-3.36-.48-4.32-1.44-.96-.96-1.44-2.4-1.44-4.32 0-1.92.48-3.36 1.44-4.32.96-.96 2.4-1.44 4.32-1.44s3.36.48 4.32 1.44c.96.96 1.44 2.4 1.44 4.32 0 1.92-.48 3.36-1.44 4.32z" fill="white"/>
+                  <path d="M28.8 3.84c-1.44 0-2.64.48-3.6 1.44-.96.96-1.44 2.4-1.44 4.32 0 1.92.48 3.36 1.44 4.32.96.96 2.16 1.44 3.6 1.44 1.2 0 2.16-.36 2.88-1.08v.84h2.4V.6h-2.4v4.32c-.72-.72-1.68-1.08-2.88-1.08zm.48 9.72c-.96 0-1.68-.36-2.16-.96-.48-.6-.72-1.44-.72-2.52s.24-1.92.72-2.52c.48-.6 1.2-.96 2.16-.96.96 0 1.68.36 2.16.96.48.6.72 1.44.72 2.52s-.24 1.92-.72 2.52c-.48.6-1.2.96-2.16.96z" fill="white"/>
+                  <path d="M43.2 3.84c-1.92 0-3.36.48-4.32 1.44-.96.96-1.44 2.4-1.44 4.32 0 1.92.48 3.36 1.44 4.32.96.96 2.4 1.44 4.32 1.44 1.92 0 3.36-.48 4.32-1.44.96-.96 1.44-2.4 1.44-4.32 0-1.92-.48-3.36-1.44-4.32-.96-.96-2.4-1.44-4.32-1.44zm2.16 8.76c-.48.6-1.2.96-2.16.96-.96 0-1.68-.36-2.16-.96-.48-.6-.72-1.44-.72-2.52s.24-1.92.72-2.52c.48-.6 1.2-.96 2.16-.96.96 0 1.68.36 2.16.96.48.6.72 1.44.72 2.52s-.24 1.92-.72 2.52z" fill="white"/>
+                  <path d="M58.8 3.84c-1.92 0-3.36.48-4.32 1.44-.96.96-1.44 2.4-1.44 4.32 0 1.92.48 3.36 1.44 4.32.96.96 2.4 1.44 4.32 1.44 1.44 0 2.64-.36 3.6-1.08v.84h2.4V4.08h-2.4v.84c-.96-.72-2.16-1.08-3.6-1.08zm.48 9.72c-.96 0-1.68-.36-2.16-.96-.48-.6-.72-1.44-.72-2.52s.24-1.92.72-2.52c.48-.6 1.2-.96 2.16-.96.96 0 1.68.36 2.16.96.48.6.72 1.44.72 2.52s-.24 1.92-.72 2.52c-.48.6-1.2.96-2.16.96z" fill="white"/>
+                  <path d="M72 4.08h-2.64l-2.76 6.96-2.76-6.96h-2.88l4.32 10.56h2.4L72 4.08z" fill="white"/>
+                </svg>
+              </Button>
+              
               <Button size="lg" variant="outline" className="w-full">
                 <Heart className="w-4 h-4 mr-2" />
                 Add to Wishlist
