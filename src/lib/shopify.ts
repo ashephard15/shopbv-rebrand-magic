@@ -1,9 +1,9 @@
 import { toast } from "sonner";
 
 const SHOPIFY_API_VERSION = '2025-07';
-const SHOPIFY_STORE_PERMANENT_DOMAIN = 'shopbv-rebrand-magic-qzhm7.myshopify.com';
+const SHOPIFY_STORE_PERMANENT_DOMAIN = 'beautyvaultcosmetics.myshopify.com';
 const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_PERMANENT_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
-const SHOPIFY_STOREFRONT_TOKEN = 'cfc699448589623562172067beade905';
+const SHOPIFY_STOREFRONT_TOKEN = '3a20dd80e21f79771ee882b037ba332b';
 
 export interface ShopifyProduct {
   node: {
