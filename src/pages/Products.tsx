@@ -1,19 +1,49 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { products } from "@/data/productsData";
+import { useProducts, getProductsByCategory, getUniqueCategories } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Loader2 } from "lucide-react";
 
 const Products = () => {
+  const { products, loading, error } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  const categories = ["all", "Lip Makeup", "Face Makeup", "Eye Makeup", "Tools & Brushes"];
+  const categories = useMemo(() => getUniqueCategories(products), [products]);
+  const filteredProducts = useMemo(
+    () => getProductsByCategory(products, selectedCategory),
+    [products, selectedCategory]
+  );
 
-  const filteredProducts = selectedCategory === "all" 
-    ? products 
-    : products.filter(p => p.category === selectedCategory);
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <main className="flex items-center justify-center py-32">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-lg text-muted-foreground">Loading products...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <main className="flex items-center justify-center py-32">
+          <div className="text-center">
+            <p className="text-lg text-destructive">{error}</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -110,6 +140,14 @@ const Products = () => {
               <div className="text-center py-16">
                 <p className="text-muted-foreground text-lg">
                   No products found in this category
+                </p>
+              </div>
+            )}
+
+            {products.length > 0 && (
+              <div className="text-center mt-12">
+                <p className="text-sm text-muted-foreground">
+                  Showing {filteredProducts.length} of {products.length} products
                 </p>
               </div>
             )}
