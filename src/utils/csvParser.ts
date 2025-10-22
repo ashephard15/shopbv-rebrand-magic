@@ -1,36 +1,39 @@
 // CSV Parser utility for Shopify product exports
-import { Product, ProductVariant } from "@/data/productsData";
+import Papa from 'papaparse';
+import { Product } from "@/data/productsData";
 
 export function parseShopifyCSV(csvText: string): Product[] {
-  const lines = csvText.split('\n');
-  const headers = lines[0].split(',');
-  
+  const parsed = Papa.parse(csvText, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: (header) => header.trim(),
+  });
+
   const productsMap = new Map<string, Product>();
-  
-  for (let i = 1; i < lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    
-    const values = parseCSVLine(lines[i]);
-    const row: any = {};
-    
-    headers.forEach((header, index) => {
-      row[header] = values[index] || '';
-    });
-    
-    const handle = row['Handle'];
-    if (!handle) continue;
-    
-    const title = row['Title'];
+
+  parsed.data.forEach((row: any) => {
+    const handle = row['Handle']?.trim();
+    if (!handle) return;
+
+    const title = row['Title']?.trim();
     const price = parseFloat(row['Variant Price']) || 0;
-    const compareAtPrice = row['Variant Compare At Price'] ? parseFloat(row['Variant Compare At Price']) : undefined;
-    const image = row['Image Src'];
+    const compareAtPrice = row['Variant Compare At Price'] 
+      ? parseFloat(row['Variant Compare At Price']) 
+      : undefined;
     
+    // Clean up image URL - remove leading quotes and other artifacts
+    let image = row['Image Src']?.trim() || '';
+    image = image.replace(/^['"]|['"]$/g, ''); // Remove leading/trailing quotes
+    image = image.split(',')[0]; // Take first part if comma-separated
+
     // If this is a main product row (has title and description)
-    if (title && title.trim()) {
+    if (title) {
       const description = stripHTML(row['Body (HTML)']);
       const category = extractCategory(row['Product Category']);
-      const tags = row['Tags'] ? row['Tags'].split(',').map((t: string) => t.trim()).filter(Boolean) : [];
-      
+      const tags = row['Tags'] 
+        ? row['Tags'].split(',').map((t: string) => t.trim()).filter(Boolean) 
+        : [];
+
       productsMap.set(handle, {
         handle,
         title,
@@ -42,55 +45,32 @@ export function parseShopifyCSV(csvText: string): Product[] {
         compareAtPrice,
         image,
         tags,
-        published: row['Published'] === 'true',
+        published: row['Published'] === 'true' || row['Status'] === 'active',
         variants: []
       });
     } else if (productsMap.has(handle)) {
       // This is a variant row
       const product = productsMap.get(handle)!;
-      const variantTitle = row['Option1 Value'];
-      
-      if (variantTitle && variantTitle.trim()) {
+      const variantTitle = row['Option1 Value']?.trim();
+
+      if (variantTitle) {
         product.variants = product.variants || [];
+        
+        let variantImage = row['Variant Image']?.trim() || '';
+        variantImage = variantImage.replace(/^['"]|['"]$/g, '');
+        variantImage = variantImage.split(',')[0];
+        
         product.variants.push({
           title: variantTitle,
           price,
           compareAtPrice,
-          image: row['Variant Image'] || image
+          image: variantImage || image
         });
       }
     }
-  }
-  
-  return Array.from(productsMap.values());
-}
+  });
 
-function parseCSVLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-  
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    const nextChar = line[i + 1];
-    
-    if (char === '"') {
-      if (inQuotes && nextChar === '"') {
-        current += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-  
-  result.push(current.trim());
-  return result;
+  return Array.from(productsMap.values()).filter(p => p.published);
 }
 
 function stripHTML(html: string): string {
@@ -120,17 +100,15 @@ function extractCategory(fullCategory: string): string {
   // Extract the last meaningful part
   // e.g., "Health & Beauty > Personal Care > Cosmetics > Makeup > Lip Makeup > Lipsticks" -> "Lip Makeup"
   const parts = fullCategory.split('>').map(p => p.trim());
-  
-  if (parts.length >= 2) {
-    const lastPart = parts[parts.length - 1];
-    const secondLastPart = parts[parts.length - 2];
-    
-    // If last part is too specific, use second to last
-    if (lastPart.length > 20 || lastPart.includes('&')) {
-      return secondLastPart;
-    }
-    return lastPart;
+
+  if (parts.length >= 5) {
+    // For makeup categories, get the specific type (Lip Makeup, Face Makeup, Eye Makeup)
+    return parts[parts.length - 2] || parts[parts.length - 1];
   }
   
+  if (parts.length >= 2) {
+    return parts[parts.length - 1];
+  }
+
   return parts[0] || 'Other';
 }
