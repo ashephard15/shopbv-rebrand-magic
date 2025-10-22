@@ -1,90 +1,76 @@
 import { Button } from "@/components/ui/button";
-import makeupNails from "@/assets/collection-makeup-nails-new.png";
-import skincare from "@/assets/collection-skincare-new.png";
-import haircare from "@/assets/collection-haircare-new.png";
-import fragrance from "@/assets/collection-fragrance-new.png";
-import bodycare from "@/assets/collection-bodycare.jpg";
-import toolsBrushes from "@/assets/collection-tools-brushes.jpg";
+import { ArrowRight } from "lucide-react";
+import fragranceImg from "@/assets/collection-fragrance-new.png";
+import skincareImg from "@/assets/collection-skincare-new.png";
+import makeupImg from "@/assets/collection-makeup-nails-new.png";
+import haircareImg from "@/assets/collection-haircare-new.png";
 
 const Collections = () => {
   const collections = [
     {
-      title: "Makeup & Nails",
-      description: "From bold lips to perfect tips, own your look.",
-      image: makeupNails,
-      link: "#makeup-nails"
+      title: "Fragrance",
+      description: "Signature scents for every mood",
+      image: fragranceImg,
+      link: "/products?category=Fragrance"
     },
     {
-      title: "Skin Care",
-      description: "Nourish and glow from within.",
-      image: skincare,
-      link: "#skincare"
+      title: "Skincare",
+      description: "Glow from within with our curated skincare",
+      image: skincareImg,
+      link: "/products?category=Skin Care"
+    },
+    {
+      title: "Makeup",
+      description: "Express yourself with bold colors",
+      image: makeupImg,
+      link: "/products?category=Makeup"
     },
     {
       title: "Hair Care",
-      description: "Luscious locks deserve the best.",
-      image: haircare,
-      link: "#haircare"
-    },
-    {
-      title: "Fragrance",
-      description: "Make your signature scent unforgettable.",
-      image: fragrance,
-      link: "#fragrance"
-    },
-    {
-      title: "Body Care",
-      description: "Smooth, soft, and totally you.",
-      image: bodycare,
-      link: "#bodycare"
-    },
-    {
-      title: "Tools & Brushes",
-      description: "The right tools for flawless finishes.",
-      image: toolsBrushes,
-      link: "#tools-brushes"
+      description: "Transform your hair care routine",
+      image: haircareImg,
+      link: "/products?category=Hair Care"
     }
   ];
 
   return (
-    <section id="catalog" className="py-20 bg-secondary">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Shop Our Must-Have Collections!
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Shop by Category
           </h2>
-          <p className="font-sans text-lg text-muted-foreground">
-            Curated. Confident. Yours.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Explore our curated collections of premium beauty products
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {collections.map((collection) => (
-            <div 
+            <a
               key={collection.title}
-              className="group relative overflow-hidden rounded-xl bg-card shadow-md hover:shadow-xl transition-all duration-300"
+              href={collection.link}
+              className="group relative overflow-hidden rounded-lg border border-border hover:shadow-lg transition-all"
             >
-              <div className="aspect-[3/4] overflow-hidden bg-secondary/30">
-                <img 
+              <div className="aspect-[3/4] overflow-hidden bg-secondary">
+                <img
                   src={collection.image}
-                  alt={`${collection.title} Collection`}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  alt={collection.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <div className="px-4 pb-4 pt-2 space-y-2">
-                <h3 className="font-serif text-2xl font-bold text-foreground">
-                  {collection.title}
-                </h3>
-                <p className="font-sans text-muted-foreground">
-                  {collection.description}
-                </p>
-                <Button 
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-sans font-semibold"
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
+                <h3 className="text-2xl font-bold mb-2">{collection.title}</h3>
+                <p className="text-sm mb-4 opacity-90">{collection.description}</p>
+                <Button
+                  size="sm"
+                  className="bg-white text-black hover:bg-white/90 rounded-full"
                 >
-                  Shop {collection.title}
+                  Shop Now
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>

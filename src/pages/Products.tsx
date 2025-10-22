@@ -3,8 +3,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useProducts, getProductsByCategory, getUniqueCategories } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const Products = () => {
   const { products, loading, error } = useProducts();
@@ -50,21 +49,21 @@ const Products = () => {
       <Navigation />
       <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-16">
+        <section className="bg-secondary py-12">
           <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
+            <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Our Products
+                Shop All Products
               </h1>
               <p className="text-lg text-muted-foreground">
-                Discover our curated collection of premium beauty products
+                Discover beauty essentials for every look
               </p>
             </div>
           </div>
         </section>
 
         {/* Category Filter */}
-        <section className="py-8 border-b">
+        <section className="py-6 border-b bg-background sticky top-[185px] z-40">
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap gap-2 justify-center">
               {categories.map((category) => (
@@ -72,7 +71,8 @@ const Products = () => {
                   key={category}
                   variant={selectedCategory === category ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category)}
-                  className="capitalize"
+                  className="capitalize rounded-full"
+                  size="sm"
                 >
                   {category}
                 </Button>
@@ -82,15 +82,15 @@ const Products = () => {
         </section>
 
         {/* Products Grid */}
-        <section className="py-16">
+        <section className="py-12 bg-background">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
               {filteredProducts.map((product) => (
                 <div
                   key={product.handle}
-                  className="group bg-card border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                  className="group bg-card border border-border rounded-sm overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  <div className="aspect-square overflow-hidden bg-muted">
+                  <div className="aspect-square overflow-hidden bg-secondary">
                     <img
                       src={product.image}
                       alt={product.title}
@@ -98,38 +98,27 @@ const Products = () => {
                       loading="lazy"
                     />
                   </div>
-                  <div className="p-4">
-                    <div className="mb-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {product.category}
-                      </Badge>
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+                  <div className="p-3">
+                    <h3 className="font-medium text-sm mb-1 line-clamp-2 min-h-[2.5rem]">
                       {product.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold">
-                          ${product.price.toFixed(2)}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-base font-bold">
+                        ${product.price.toFixed(2)}
+                      </span>
+                      {product.compareAtPrice && product.compareAtPrice > product.price && (
+                        <span className="text-xs text-muted-foreground line-through">
+                          ${product.compareAtPrice.toFixed(2)}
                         </span>
-                        {product.compareAtPrice && product.compareAtPrice > product.price && (
-                          <span className="text-sm text-muted-foreground line-through">
-                            ${product.compareAtPrice.toFixed(2)}
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
                     {product.variants && product.variants.length > 0 && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {product.variants.length} variants available
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {product.variants.length} shades
                       </p>
                     )}
-                    <Button className="w-full mt-4" size="sm">
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Add to Cart
+                    <Button className="w-full" size="sm">
+                      Add to Bag
                     </Button>
                   </div>
                 </div>

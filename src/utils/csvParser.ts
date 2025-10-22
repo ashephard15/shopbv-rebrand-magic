@@ -96,13 +96,40 @@ function stripHTML(html: string): string {
 
 function extractCategory(fullCategory: string): string {
   if (!fullCategory) return 'Other';
-  
+
   // Extract the last meaningful part
-  // e.g., "Health & Beauty > Personal Care > Cosmetics > Makeup > Lip Makeup > Lipsticks" -> "Lip Makeup"
   const parts = fullCategory.split('>').map(p => p.trim());
 
+  // Check for specific category keywords
+  const categoryStr = fullCategory.toLowerCase();
+  
+  if (categoryStr.includes('skin care') || categoryStr.includes('lotions') || categoryStr.includes('moisturizers')) {
+    return 'Skin Care';
+  }
+  if (categoryStr.includes('bath & body') || categoryStr.includes('body wash')) {
+    return 'Body Care';
+  }
+  if (categoryStr.includes('hair care') || categoryStr.includes('hair styling')) {
+    return 'Hair Care';
+  }
+  if (categoryStr.includes('fragrance') || categoryStr.includes('perfumes') || categoryStr.includes('body mist')) {
+    return 'Fragrance';
+  }
+  if (categoryStr.includes('lip makeup') || categoryStr.includes('lipstick') || categoryStr.includes('lip gloss')) {
+    return 'Lip Makeup';
+  }
+  if (categoryStr.includes('face makeup') || categoryStr.includes('blush') || categoryStr.includes('bronzer')) {
+    return 'Face Makeup';
+  }
+  if (categoryStr.includes('eye makeup') || categoryStr.includes('eyeshadow') || categoryStr.includes('mascara')) {
+    return 'Eye Makeup';
+  }
+  if (categoryStr.includes('tools') || categoryStr.includes('brushes') || categoryStr.includes('sponge')) {
+    return 'Tools & Brushes';
+  }
+
+  // Fallback to extracting from path
   if (parts.length >= 5) {
-    // For makeup categories, get the specific type (Lip Makeup, Face Makeup, Eye Makeup)
     return parts[parts.length - 2] || parts[parts.length - 1];
   }
   
