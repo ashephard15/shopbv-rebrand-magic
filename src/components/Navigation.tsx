@@ -59,6 +59,9 @@ const Navigation = () => {
             <Link to="/products" className="text-sm font-medium hover:text-primary transition-colors">
               Shop
             </Link>
+            <Link to="/rewards" className="text-sm font-medium hover:text-primary transition-colors">
+              Rewards
+            </Link>
             <Link to="/products?category=new" className="text-sm font-medium hover:text-primary transition-colors">
               New
             </Link>
