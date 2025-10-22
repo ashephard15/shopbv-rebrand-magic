@@ -139,7 +139,7 @@ const Products = () => {
                   <Link
                     key={product.handle}
                     to={`/products/${product.handle}`}
-                    className="group bg-card border border-border rounded-sm overflow-hidden hover:shadow-md transition-shadow"
+                    className="group bg-card border border-border rounded-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col"
                   >
                     <div className="aspect-square overflow-hidden bg-secondary">
                       <img
@@ -149,7 +149,7 @@ const Products = () => {
                         loading="lazy"
                       />
                     </div>
-                    <div className="p-3">
+                    <div className="p-3 flex flex-col flex-1">
                       <h3 className="font-medium text-sm mb-1 line-clamp-2 min-h-[2.5rem]">
                         {product.title}
                       </h3>
@@ -169,16 +169,18 @@ const Products = () => {
                           {product.variants.length} shades
                         </p>
                       )}
-                      <Button 
-                        className="w-full" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          // Add to bag functionality here
-                        }}
-                      >
-                        Add to Bag
-                      </Button>
+                      <div className="mt-auto">
+                        <Button 
+                          className="w-full" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            // Add to bag functionality here
+                          }}
+                        >
+                          Add to Bag
+                        </Button>
+                      </div>
                     </div>
                   </Link>
                 ))}
