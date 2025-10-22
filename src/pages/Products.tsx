@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Loader2, SlidersHorizontal } from "lucide-react";
 import ProductFilters, { FilterState } from "@/components/ProductFilters";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Product } from "@/data/productsData";
+import { useCartStore } from "@/stores/cartStore";
+import { toast } from "sonner";
 
 const Products = () => {
   const { products, loading, error } = useProducts();
+  const addItem = useCartStore(state => state.addItem);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     priceRange: [0, 100],
@@ -20,18 +22,12 @@ const Products = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      // Category filter
-      if (
-        filters.categories.length > 0 &&
-        !filters.categories.includes(product.category)
-      ) {
-        return false;
-      }
-
+      const price = parseFloat(product.node.priceRange.minVariantPrice.amount);
+      
       // Price filter
       if (
-        product.price < filters.priceRange[0] ||
-        product.price > filters.priceRange[1]
+        price < filters.priceRange[0] ||
+        price > filters.priceRange[1]
       ) {
         return false;
       }
@@ -39,6 +35,25 @@ const Products = () => {
       return true;
     });
   }, [products, filters]);
+
+  const handleAddToCart = (product: typeof products[0]) => {
+    const variant = product.node.variants.edges[0]?.node;
+    if (!variant) return;
+
+    addItem({
+      product,
+      variantId: variant.id,
+      variantTitle: variant.title,
+      price: variant.price,
+      quantity: 1,
+      selectedOptions: variant.selectedOptions
+    });
+
+    toast.success("Added to cart", {
+      description: `${product.node.title} has been added to your cart`,
+      position: "top-center"
+    });
+  };
 
   if (loading) {
     return (
@@ -59,10 +74,9 @@ const Products = () => {
     return (
       <div className="min-h-screen">
         <Navigation />
-        <main className="flex items-center justify-center py-32">
-          <div className="text-center">
-            <p className="text-lg text-destructive">{error}</p>
-          </div>
+        <main className="container mx-auto px-4 py-32 text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
         </main>
         <Footer />
       </div>
@@ -72,144 +86,117 @@ const Products = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
-      <main className="bg-background">
+      
+      <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
-        <section className="bg-secondary py-8 border-b">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                All Products
-              </h1>
-              <p className="text-muted-foreground">
-                {filteredProducts.length} products
-              </p>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">All Products</h1>
+          <p className="text-muted-foreground">
+            {filteredProducts.length} products available
+          </p>
+        </div>
+
+        <div className="flex gap-8">
+          {/* Desktop Filters */}
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <div className="sticky top-24">
+              <ProductFilters 
+                onFilterChange={setFilters}
+                activeFilters={filters}
+              />
             </div>
-          </div>
-        </section>
+          </aside>
 
-        {/* Main Content with Sidebar */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex gap-8">
-            {/* Desktop Sidebar Filters */}
-            <aside className="hidden lg:block w-64 flex-shrink-0">
-              <div className="sticky top-32">
-                <ProductFilters
-                  onFilterChange={setFilters}
-                  activeFilters={filters}
-                />
-              </div>
-            </aside>
+          {/* Product Grid */}
+          <div className="flex-1">
+            {/* Mobile Filter Toggle */}
+            <div className="lg:hidden mb-6">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <SlidersHorizontal className="w-4 h-4 mr-2" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 overflow-y-auto">
+                  <ProductFilters 
+                    onFilterChange={setFilters}
+                    activeFilters={filters}
+                  />
+                </SheetContent>
+              </Sheet>
+            </div>
 
-            {/* Products Grid */}
-            <div className="flex-1">
-              {/* Mobile Filter Button */}
-              <div className="lg:hidden mb-4">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                      <SlidersHorizontal className="mr-2 h-4 w-4" />
-                      Filters
-                      {(filters.categories.length + filters.benefits.length) >
-                        0 && (
-                        <span className="ml-2 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
-                          {filters.categories.length + filters.benefits.length}
-                        </span>
-                      )}
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-80 p-0">
-                    <ProductFilters
-                      onFilterChange={setFilters}
-                      activeFilters={filters}
-                    />
-                  </SheetContent>
-                </Sheet>
-              </div>
-
-              {/* Results Count and Sort */}
-              <div className="flex items-center justify-between mb-6 pb-4 border-b">
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground mb-4">No products found</p>
                 <p className="text-sm text-muted-foreground">
-                  Showing {filteredProducts.length} of {products.length} products
+                  Start by creating products in your Shopify store
                 </p>
               </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProducts.map((product) => {
+                  const mainImage = product.node.images.edges[0]?.node;
+                  const price = product.node.priceRange.minVariantPrice;
+                  const hasVariants = product.node.variants.edges.length > 1;
 
-              {/* Products Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredProducts.map((product) => (
-                  <Link
-                    key={product.handle}
-                    to={`/products/${product.handle}`}
-                    className="group bg-card border border-border rounded-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col"
-                  >
-                    <div className="aspect-square overflow-hidden bg-secondary">
-                      <img
-                        src={product.image}
-                        alt={product.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className="p-3 flex flex-col flex-1">
-                      <h3 className="font-medium text-sm mb-1 line-clamp-2 min-h-[2.5rem]">
-                        {product.title}
-                      </h3>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-base font-bold">
-                          ${product.price.toFixed(2)}
-                        </span>
-                        {product.compareAtPrice &&
-                          product.compareAtPrice > product.price && (
-                            <span className="text-xs text-muted-foreground line-through">
-                              ${product.compareAtPrice.toFixed(2)}
-                            </span>
+                  return (
+                    <div
+                      key={product.node.id}
+                      className="group relative bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-shadow"
+                    >
+                      <Link to={`/product/${product.node.handle}`}>
+                        <div className="aspect-square overflow-hidden bg-secondary/20">
+                          {mainImage ? (
+                            <img
+                              src={mainImage.url}
+                              alt={mainImage.altText || product.node.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                              No Image
+                            </div>
                           )}
-                      </div>
-                      {product.variants && product.variants.length > 0 && (
-                        <p className="text-xs text-muted-foreground mb-2">
-                          {product.variants.length} shades
-                        </p>
-                      )}
-                      <div className="mt-auto">
+                        </div>
+                        
+                        <div className="p-4">
+                          <h3 className="font-semibold mb-2 line-clamp-2">{product.node.title}</h3>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-lg font-bold">
+                              ${parseFloat(price.amount).toFixed(2)}
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                              {price.currencyCode}
+                            </span>
+                          </div>
+                          {hasVariants && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {product.node.variants.edges.length} variants available
+                            </p>
+                          )}
+                        </div>
+                      </Link>
+                      
+                      <div className="p-4 pt-0">
                         <Button 
-                          className="w-full" 
+                          onClick={() => handleAddToCart(product)}
+                          className="w-full"
                           size="sm"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            // Add to bag functionality here
-                          }}
                         >
-                          Add to Bag
+                          Add to Cart
                         </Button>
                       </div>
                     </div>
-                  </Link>
-                ))}
+                  );
+                })}
               </div>
-
-              {filteredProducts.length === 0 && (
-                <div className="text-center py-16">
-                  <p className="text-muted-foreground text-lg mb-4">
-                    No products found
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      setFilters({
-                        categories: [],
-                        priceRange: [0, 100],
-                        brands: [],
-                        benefits: [],
-                      })
-                    }
-                  >
-                    Clear all filters
-                  </Button>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );

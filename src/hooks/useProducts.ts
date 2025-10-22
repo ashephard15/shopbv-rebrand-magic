@@ -1,27 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Product } from '@/data/productsData';
-import { parseShopifyCSV } from '@/utils/csvParser';
+import { fetchProducts, ShopifyProduct } from '@/lib/shopify';
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ShopifyProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        // Import the CSV file
-        const response = await fetch('/src/data/products.csv');
-        const csvText = await response.text();
-        
-        // Parse the CSV
-        const parsedProducts = parseShopifyCSV(csvText);
-        
-        setProducts(parsedProducts);
+        const shopifyProducts = await fetchProducts(50);
+        setProducts(shopifyProducts);
         setLoading(false);
       } catch (err) {
         console.error('Error loading products:', err);
-        setError('Failed to load products');
+        setError('Failed to load products from Shopify');
         setLoading(false);
       }
     };
@@ -32,17 +25,14 @@ export function useProducts() {
   return { products, loading, error };
 }
 
-export function getProductsByCategory(products: Product[], category: string): Product[] {
+export function getProductsByCategory(products: ShopifyProduct[], category: string): ShopifyProduct[] {
   if (category === 'all') return products;
-  return products.filter(p => 
-    p.category.toLowerCase().includes(category.toLowerCase())
-  );
+  // For Shopify products, you might need to add product type or tags to filter
+  return products;
 }
 
-export function getUniqueCategories(products: Product[]): string[] {
+export function getUniqueCategories(products: ShopifyProduct[]): string[] {
+  // Extract unique categories from Shopify product types
   const categories = new Set<string>();
-  products.forEach(p => {
-    if (p.category) categories.add(p.category);
-  });
   return ['all', ...Array.from(categories).sort()];
 }

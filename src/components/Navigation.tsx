@@ -1,8 +1,9 @@
-import { ShoppingCart, Search, User, Menu } from "lucide-react";
+import { Search, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import logo from "@/assets/beauty-vault-logo.png";
 import { Link } from "react-router-dom";
+import { CartDrawer } from "@/components/CartDrawer";
 
 const Navigation = () => {
   return (
@@ -42,9 +43,7 @@ const Navigation = () => {
               <Button variant="ghost" size="icon" className="hidden md:flex">
                 <User className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon">
-                <ShoppingCart className="h-5 w-5" />
-              </Button>
+              <CartDrawer />
               <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="h-5 w-5" />
               </Button>
