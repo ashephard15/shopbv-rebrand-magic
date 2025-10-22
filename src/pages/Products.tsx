@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useProducts } from "@/hooks/useProducts";
@@ -135,8 +136,9 @@ const Products = () => {
               {/* Products Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredProducts.map((product) => (
-                  <div
+                  <Link
                     key={product.handle}
+                    to={`/products/${product.handle}`}
                     className="group bg-card border border-border rounded-sm overflow-hidden hover:shadow-md transition-shadow"
                   >
                     <div className="aspect-square overflow-hidden bg-secondary">
@@ -167,11 +169,18 @@ const Products = () => {
                           {product.variants.length} shades
                         </p>
                       )}
-                      <Button className="w-full" size="sm">
+                      <Button 
+                        className="w-full" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          // Add to bag functionality here
+                        }}
+                      >
                         Add to Bag
                       </Button>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
 
