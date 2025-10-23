@@ -17,9 +17,9 @@ serve(async (req) => {
   try {
     console.log('Fetching products from Wix...');
     
-    // Wix Stores V3 API endpoint for products
+    // Wix Stores API endpoint for products
     const response = await fetch(
-      `https://www.wixapis.com/stores/v3/products/query`,
+      `https://www.wixapis.com/stores-reader/v1/products/query`,
       {
         method: 'POST',
         headers: {
