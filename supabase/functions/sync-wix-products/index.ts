@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const WIX_API_KEY = Deno.env.get('WIX_API_KEY');
-const WIX_SITE_ID = Deno.env.get('WIX_SITE_ID');
+const WIX_ACCOUNT_ID = Deno.env.get('WIX_ACCOUNT_ID');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -78,7 +78,7 @@ serve(async (req) => {
             headers: {
               'Authorization': WIX_API_KEY!,
               'Content-Type': 'application/json',
-              'wix-site-id': WIX_SITE_ID!,
+              'wix-account-id': WIX_ACCOUNT_ID!,
             },
             body: JSON.stringify({ product: wixProduct })
           }
