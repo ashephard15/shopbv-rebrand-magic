@@ -18,106 +18,112 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting Wix product sync...');
+    console.log('Starting database to Wix product sync...');
     
-    // Fetch products from Wix
-    const wixResponse = await fetch(
-      `https://www.wixapis.com/stores/v1/products/query`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': WIX_API_KEY!,
-          'Content-Type': 'application/json',
-          'wix-site-id': WIX_SITE_ID!,
-        },
-        body: JSON.stringify({
-          query: {
-            paging: {
-              limit: 100
-            }
-          }
-        })
-      }
-    );
+    // Initialize Supabase client
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-    if (!wixResponse.ok) {
-      const errorText = await wixResponse.text();
-      console.error('Wix API error:', wixResponse.status, errorText);
-      throw new Error(`Failed to fetch products from Wix: ${wixResponse.status}`);
-    }
+    // Fetch products from database that don't have a wix_id yet
+    const { data: dbProducts, error: dbError } = await supabase
+      .from('products')
+      .select('*')
+      .is('wix_id', null);
 
-    const wixData = await wixResponse.json();
-    const wixProducts = wixData.products || [];
-    console.log(`Fetched ${wixProducts.length} products from Wix`);
+    if (dbError) throw dbError;
 
-    if (wixProducts.length === 0) {
+    if (!dbProducts || dbProducts.length === 0) {
       return new Response(
         JSON.stringify({ 
           success: true,
-          message: 'No products found in Wix store',
+          message: 'No products to sync. All products already have Wix IDs.',
           synced: 0
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Initialize Supabase client
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+    console.log(`Found ${dbProducts.length} products to sync to Wix`);
 
-    // Transform and upsert products
-    const productsToSync = wixProducts.map((wixProduct: any) => {
-      const price = parseFloat(wixProduct.price?.price || wixProduct.priceData?.price || '0');
-      const discountedPrice = wixProduct.price?.discountedPrice 
-        ? parseFloat(wixProduct.price.discountedPrice)
-        : null;
-      
-      const imageUrl = wixProduct.media?.items?.[0]?.image?.url 
-        || wixProduct.media?.mainMedia?.image?.url
-        || null;
-      
-      const imageAlt = wixProduct.media?.items?.[0]?.image?.altText 
-        || wixProduct.name
-        || null;
+    const syncedProducts = [];
+    const errors = [];
 
-      return {
-        wix_id: wixProduct.id,
-        name: wixProduct.name || 'Unnamed Product',
-        description: wixProduct.description || null,
-        slug: wixProduct.slug || wixProduct.id.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        price: price,
-        currency: wixProduct.price?.currency || 'USD',
-        discounted_price: discountedPrice,
-        image_url: imageUrl,
-        image_alt: imageAlt,
-        stock_quantity: wixProduct.stock?.quantity || null,
-        in_stock: wixProduct.stock?.inStock !== false,
-        category: wixProduct.productType || null,
-        brand: wixProduct.brand || null,
-      };
-    });
+    // Create each product in Wix
+    for (const product of dbProducts) {
+      try {
+        const wixProduct = {
+          name: product.name,
+          description: product.description || undefined,
+          productType: product.category || undefined,
+          priceData: {
+            price: product.price.toString(),
+            currency: product.currency,
+            discountedPrice: product.discounted_price?.toString() || undefined
+          },
+          stock: {
+            trackInventory: true,
+            inStock: product.in_stock,
+            quantity: product.stock_quantity || 0
+          },
+          visible: true
+        };
 
-    // Upsert products (insert or update based on wix_id)
-    const { data, error } = await supabase
-      .from('products')
-      .upsert(productsToSync, { 
-        onConflict: 'wix_id',
-        ignoreDuplicates: false 
-      })
-      .select();
+        console.log(`Creating product in Wix: ${product.name}`);
 
-    if (error) {
-      console.error('Database error:', error);
-      throw error;
+        const wixResponse = await fetch(
+          `https://www.wixapis.com/stores/v1/products`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': WIX_API_KEY!,
+              'Content-Type': 'application/json',
+              'wix-site-id': WIX_SITE_ID!,
+            },
+            body: JSON.stringify({ product: wixProduct })
+          }
+        );
+
+        if (!wixResponse.ok) {
+          const errorText = await wixResponse.text();
+          console.error(`Failed to create product ${product.name}:`, errorText);
+          errors.push({ product: product.name, error: errorText });
+          continue;
+        }
+
+        const createdProduct = await wixResponse.json();
+        const wixId = createdProduct.product?.id;
+
+        if (wixId) {
+          // Update database with Wix ID
+          const { error: updateError } = await supabase
+            .from('products')
+            .update({ wix_id: wixId })
+            .eq('id', product.id);
+
+          if (updateError) {
+            console.error(`Failed to update product ${product.name} with Wix ID:`, updateError);
+            errors.push({ product: product.name, error: 'Failed to save Wix ID' });
+          } else {
+            console.log(`Successfully created and linked product: ${product.name}`);
+            syncedProducts.push({ name: product.name, wix_id: wixId });
+          }
+        }
+
+      } catch (error) {
+        console.error(`Error syncing product ${product.name}:`, error);
+        errors.push({ 
+          product: product.name, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        });
+      }
     }
-
-    console.log(`Successfully synced ${data?.length || 0} products`);
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: `Successfully synced ${data?.length || 0} products from Wix`,
-        synced: data?.length || 0,
-        products: data
+        message: `Synced ${syncedProducts.length} products to Wix`,
+        synced: syncedProducts.length,
+        products: syncedProducts,
+        errors: errors.length > 0 ? errors : undefined
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -129,7 +135,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: false,
         error: errorMessage,
-        details: 'Failed to sync products from Wix'
+        details: 'Failed to sync products to Wix'
       }), 
       {
         status: 500,

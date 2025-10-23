@@ -21,7 +21,7 @@ const SyncProducts = () => {
       if (data?.success) {
         setLastSync(new Date());
         toast.success("Products synced!", {
-          description: `Successfully synced ${data.synced} products from Wix`,
+          description: `Successfully synced ${data.synced} products to Wix`,
           position: "top-center"
         });
       } else {
@@ -50,11 +50,11 @@ const SyncProducts = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <RefreshCw className="w-5 h-5" />
-                Wix Product Sync
+                Push Products to Wix
               </CardTitle>
               <CardDescription>
-                Sync your products from Wix store to your database. This will fetch all products
-                and update your local catalog.
+                Upload your database products to your Wix store. This will create products in Wix
+                for any items that don't already exist there.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -87,10 +87,10 @@ const SyncProducts = () => {
               <div className="text-sm text-muted-foreground space-y-2 pt-4 border-t">
                 <p className="font-medium">What happens when you sync:</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>Fetches all products from your Wix store</li>
-                  <li>Updates existing products or adds new ones</li>
-                  <li>Preserves product images and details</li>
-                  <li>Syncs pricing and inventory information</li>
+                  <li>Finds products in database without Wix IDs</li>
+                  <li>Creates those products in your Wix store</li>
+                  <li>Links database products to Wix products</li>
+                  <li>Preserves all product details and pricing</li>
                 </ul>
               </div>
             </CardContent>
