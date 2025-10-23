@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const WIX_API_KEY = Deno.env.get('WIX_API_KEY');
+const WIX_SITE_ID = Deno.env.get('WIX_SITE_ID');
 const WIX_ACCOUNT_ID = Deno.env.get('WIX_ACCOUNT_ID');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -53,25 +54,15 @@ serve(async (req) => {
         const wixProduct = {
           name: product.name,
           description: product.description || undefined,
-          productType: 'PHYSICAL',
-          physicalProperties: {},
-          variantsInfo: {
-            variants: [
-              {
-                price: {
-                  actualPrice: {
-                    amount: product.price.toString(),
-                    currency: product.currency
-                  }
-                },
-                physicalProperties: {},
-                stock: {
-                  trackInventory: true,
-                  inStock: product.in_stock,
-                  quantity: product.stock_quantity || 0
-                }
-              }
-            ]
+          productType: 'physical',
+          priceData: {
+            price: product.price.toString(),
+            currency: product.currency
+          },
+          stock: {
+            trackInventory: true,
+            inStock: product.in_stock,
+            quantity: product.stock_quantity || 0
           },
           visible: true,
           brand: product.brand || undefined
@@ -80,12 +71,13 @@ serve(async (req) => {
         console.log(`Creating product in Wix: ${product.name}`);
 
         const wixResponse = await fetch(
-          `https://www.wixapis.com/stores/v3/products`,
+          `https://www.wixapis.com/stores/v1/products`,
           {
             method: 'POST',
             headers: {
               'Authorization': WIX_API_KEY!,
               'Content-Type': 'application/json',
+              'wix-site-id': WIX_SITE_ID!,
               'wix-account-id': WIX_ACCOUNT_ID!,
             },
             body: JSON.stringify({ product: wixProduct })
