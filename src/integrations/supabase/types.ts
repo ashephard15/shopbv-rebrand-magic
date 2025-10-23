@@ -14,7 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      products: {
+        Row: {
+          brand: string | null
+          category: string | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          discounted_price: number | null
+          id: string
+          image_alt: string | null
+          image_url: string | null
+          in_stock: boolean | null
+          name: string
+          price: number
+          slug: string
+          stock_quantity: number | null
+          updated_at: string | null
+          wix_id: string | null
+        }
+        Insert: {
+          brand?: string | null
+          category?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          discounted_price?: number | null
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          in_stock?: boolean | null
+          name: string
+          price: number
+          slug: string
+          stock_quantity?: number | null
+          updated_at?: string | null
+          wix_id?: string | null
+        }
+        Update: {
+          brand?: string | null
+          category?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          discounted_price?: number | null
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          in_stock?: boolean | null
+          name?: string
+          price?: number
+          slug?: string
+          stock_quantity?: number | null
+          updated_at?: string | null
+          wix_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

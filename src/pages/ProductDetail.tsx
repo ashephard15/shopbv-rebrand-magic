@@ -4,7 +4,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Heart, ChevronLeft } from "lucide-react";
-import { fetchWixProducts, WixProduct } from "@/lib/wix";
+import { Product } from "@/hooks/useProducts";
+import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
@@ -14,9 +15,8 @@ const ProductDetail = () => {
   const { handle } = useParams();
   const navigate = useNavigate();
   const addItem = useCartStore(state => state.addItem);
-  const [product, setProduct] = useState<WixProduct | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -24,9 +24,14 @@ const ProductDetail = () => {
       
       try {
         setLoading(true);
-        const products = await fetchWixProducts();
-        const foundProduct = products.find((p: WixProduct) => p.slug === handle);
-        setProduct(foundProduct || null);
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('slug', handle)
+          .maybeSingle();
+
+        if (error) throw error;
+        setProduct(data);
       } catch (error) {
         console.error('Error loading product:', error);
       } finally {
@@ -66,16 +71,33 @@ const ProductDetail = () => {
     );
   }
 
-  const images = product.media?.items?.map(item => item.image).filter(Boolean) || [];
-  const price = product.price;
+  const displayPrice = product.discounted_price || product.price;
+  const hasDiscount = product.discounted_price && product.discounted_price < product.price;
 
   const handleAddToCart = () => {
     addItem({
-      product,
+      product: {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: {
+          price: product.price.toString(),
+          currency: product.currency,
+          discountedPrice: product.discounted_price?.toString()
+        },
+        media: {
+          items: product.image_url ? [{
+            image: {
+              url: product.image_url,
+              altText: product.image_alt || product.name
+            }
+          }] : []
+        }
+      },
       productId: product.id,
       price: {
-        amount: price.price,
-        currency: price.currency
+        amount: product.price.toString(),
+        currency: product.currency
       },
       quantity: 1,
       selectedOptions: {}
@@ -105,10 +127,10 @@ const ProductDetail = () => {
           {/* Product Images */}
           <div className="space-y-4">
             <div className="aspect-square bg-secondary/20 rounded-lg overflow-hidden">
-              {images[selectedImage] ? (
+              {product.image_url ? (
                 <img
-                  src={images[selectedImage].url}
-                  alt={images[selectedImage].altText || product.name}
+                  src={product.image_url}
+                  alt={product.image_alt || product.name}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -117,26 +139,6 @@ const ProductDetail = () => {
                 </div>
               )}
             </div>
-            
-            {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
-                {images.map((image, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImage(idx)}
-                    className={`aspect-square bg-secondary/20 rounded-md overflow-hidden border-2 transition-colors ${
-                      selectedImage === idx ? 'border-primary' : 'border-transparent'
-                    }`}
-                  >
-                    <img
-                      src={image.url}
-                      alt={`${product.name} ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Product Info */}
@@ -150,12 +152,26 @@ const ProductDetail = () => {
 
             {/* Price */}
             <div className="mb-6 space-y-3">
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold">
-                  ${parseFloat(price.price).toFixed(2)}
-                </span>
-                <span className="text-muted-foreground">{price.currency}</span>
-              </div>
+              {hasDiscount ? (
+                <div className="space-y-1">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-3xl font-bold text-destructive">
+                      ${displayPrice.toFixed(2)}
+                    </span>
+                    <span className="text-xl line-through text-muted-foreground">
+                      ${product.price.toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{product.currency}</p>
+                </div>
+              ) : (
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold">
+                    ${displayPrice.toFixed(2)}
+                  </span>
+                  <span className="text-muted-foreground">{product.currency}</span>
+                </div>
+              )}
             </div>
 
             <Separator />
@@ -181,21 +197,22 @@ const ProductDetail = () => {
             </div>
 
             {/* Stock Status */}
-            {product.stock && (
-              <div className="flex items-center gap-2 text-sm">
-                {product.stock.inStock ? (
-                  <>
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-muted-foreground">In Stock</span>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-2 h-2 bg-red-500 rounded-full" />
-                    <span className="text-muted-foreground">Out of Stock</span>
-                  </>
-                )}
-              </div>
-            )}
+            <div className="flex items-center gap-2 text-sm">
+              {product.in_stock ? (
+                <>
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  <span className="text-muted-foreground">
+                    In Stock
+                    {product.stock_quantity && ` (${product.stock_quantity} available)`}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  <span className="text-muted-foreground">Out of Stock</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

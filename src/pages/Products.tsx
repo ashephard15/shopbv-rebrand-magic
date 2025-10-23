@@ -2,14 +2,13 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { useProducts } from "@/hooks/useProducts";
+import { useProducts, Product } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import { Loader2, SlidersHorizontal } from "lucide-react";
 import ProductFilters, { FilterState } from "@/components/ProductFilters";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
-import { WixProduct } from "@/lib/wix";
 
 const Products = () => {
   const { products, loading, error } = useProducts();
@@ -23,7 +22,7 @@ const Products = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const price = parseFloat(product.price.price);
+      const price = product.discounted_price || product.price;
       
       // Price filter
       if (price < filters.priceRange[0] || price > filters.priceRange[1]) {
@@ -34,14 +33,31 @@ const Products = () => {
     });
   }, [products, filters]);
 
-  const handleAddToCart = (product: WixProduct) => {
+  const handleAddToCart = (product: Product) => {
     const cartItem = {
-      product,
+      product: {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: {
+          price: product.price.toString(),
+          currency: product.currency,
+          discountedPrice: product.discounted_price?.toString()
+        },
+        media: {
+          items: product.image_url ? [{
+            image: {
+              url: product.image_url,
+              altText: product.image_alt || product.name
+            }
+          }] : []
+        }
+      },
       productId: product.id,
       variantTitle: undefined,
       price: {
-        amount: product.price.price,
-        currency: product.price.currency
+        amount: product.price.toString(),
+        currency: product.currency
       },
       quantity: 1,
       selectedOptions: {}
@@ -136,26 +152,44 @@ const Products = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => {
-                  const firstImage = product.media?.items?.[0]?.image;
+                  const displayPrice = product.discounted_price || product.price;
+                  const hasDiscount = product.discounted_price && product.discounted_price < product.price;
 
                   return (
                     <div key={product.id} className="group">
                       <Link to={`/product/${product.slug}`}>
                         <div className="aspect-square bg-secondary/20 rounded-lg overflow-hidden mb-4">
-                          {firstImage && (
+                          {product.image_url ? (
                             <img
-                              src={firstImage.url}
-                              alt={firstImage.altText || product.name}
+                              src={product.image_url}
+                              alt={product.image_alt || product.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                              No image
+                            </div>
                           )}
                         </div>
                         <h3 className="font-medium mb-2 group-hover:text-primary transition-colors">
                           {product.name}
                         </h3>
-                        <p className="text-xl font-bold mb-3">
-                          ${parseFloat(product.price.price).toFixed(2)} {product.price.currency}
-                        </p>
+                        <div className="mb-3">
+                          {hasDiscount ? (
+                            <div className="flex items-center gap-2">
+                              <p className="text-xl font-bold text-destructive">
+                                ${displayPrice.toFixed(2)}
+                              </p>
+                              <p className="text-sm line-through text-muted-foreground">
+                                ${product.price.toFixed(2)}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-xl font-bold">
+                              ${displayPrice.toFixed(2)}
+                            </p>
+                          )}
+                        </div>
                       </Link>
                       <Button 
                         onClick={(e) => {

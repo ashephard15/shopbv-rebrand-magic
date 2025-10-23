@@ -1,20 +1,46 @@
 import { useState, useEffect } from 'react';
-import { fetchWixProducts, WixProduct } from '@/lib/wix';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface Product {
+  id: string;
+  wix_id?: string;
+  name: string;
+  description?: string;
+  slug: string;
+  price: number;
+  currency: string;
+  discounted_price?: number;
+  image_url?: string;
+  image_alt?: string;
+  stock_quantity?: number;
+  in_stock: boolean;
+  category?: string;
+  brand?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export function useProducts() {
-  const [products, setProducts] = useState<WixProduct[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const wixProducts = await fetchWixProducts();
-        setProducts(wixProducts);
+        const { data, error: fetchError } = await supabase
+          .from('products')
+          .select('*')
+          .eq('in_stock', true)
+          .order('created_at', { ascending: false });
+
+        if (fetchError) throw fetchError;
+
+        setProducts(data || []);
         setLoading(false);
       } catch (err) {
         console.error('Error loading products:', err);
-        setError('Failed to load products from Wix');
+        setError('Failed to load products');
         setLoading(false);
       }
     };
@@ -25,12 +51,15 @@ export function useProducts() {
   return { products, loading, error };
 }
 
-export function getProductsByCategory(products: WixProduct[], category: string): WixProduct[] {
+export function getProductsByCategory(products: Product[], category: string): Product[] {
   if (category === 'all') return products;
-  return products;
+  return products.filter(p => p.category?.toLowerCase() === category.toLowerCase());
 }
 
-export function getUniqueCategories(products: WixProduct[]): string[] {
+export function getUniqueCategories(products: Product[]): string[] {
   const categories = new Set<string>();
+  products.forEach(p => {
+    if (p.category) categories.add(p.category);
+  });
   return ['all', ...Array.from(categories).sort()];
 }
