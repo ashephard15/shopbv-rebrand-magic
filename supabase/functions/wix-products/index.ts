@@ -16,8 +16,9 @@ serve(async (req) => {
 
   try {
     console.log('Fetching products from Wix...');
+    console.log('Using Site ID:', WIX_SITE_ID);
     
-    // Wix Stores API endpoint for products
+    // Wix Stores API endpoint for products (site-level API)
     const response = await fetch(
       `https://www.wixapis.com/stores/v1/products/query`,
       {
@@ -28,7 +29,11 @@ serve(async (req) => {
           'wix-site-id': WIX_SITE_ID!,
         },
         body: JSON.stringify({
-          includeVariants: true
+          query: {
+            paging: {
+              limit: 100
+            }
+          }
         })
       }
     );
@@ -36,6 +41,22 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Wix API error:', response.status, errorText);
+      
+      // Provide helpful error message based on status
+      if (response.status === 404) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Site not found',
+            details: 'The WIX_SITE_ID is incorrect. Find your Site ID in your Wix dashboard URL (after /dashboard/) or by visiting https://manage.wix.com/account/api-keys',
+            wixError: errorText
+          }), 
+          {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+      
       throw new Error(`Wix API error: ${response.status} - ${errorText}`);
     }
 
@@ -51,7 +72,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: errorMessage,
-        details: 'Failed to fetch products from Wix'
+        details: 'Failed to fetch products from Wix. Check edge function logs for details.'
       }), 
       {
         status: 500,
