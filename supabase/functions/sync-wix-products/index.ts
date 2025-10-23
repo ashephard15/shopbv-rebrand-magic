@@ -53,7 +53,7 @@ serve(async (req) => {
         const wixProduct = {
           name: product.name,
           description: product.description || undefined,
-          productType: product.category || undefined,
+          productType: 'physical', // Wix requires: physical or digital
           priceData: {
             price: product.price.toString(),
             currency: product.currency,
@@ -64,7 +64,9 @@ serve(async (req) => {
             inStock: product.in_stock,
             quantity: product.stock_quantity || 0
           },
-          visible: true
+          visible: true,
+          // Store our category in additionalInfoSections or customTextFields
+          brand: product.brand || undefined
         };
 
         console.log(`Creating product in Wix: ${product.name}`);
