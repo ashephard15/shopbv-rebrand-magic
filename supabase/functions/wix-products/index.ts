@@ -19,7 +19,7 @@ serve(async (req) => {
     
     // Wix Stores API endpoint for products
     const response = await fetch(
-      `https://www.wixapis.com/stores-reader/v1/products/query`,
+      `https://www.wixapis.com/stores/v1/products/query`,
       {
         method: 'POST',
         headers: {
@@ -28,12 +28,7 @@ serve(async (req) => {
           'wix-site-id': WIX_SITE_ID!,
         },
         body: JSON.stringify({
-          query: {
-            filter: {},
-            paging: {
-              limit: 100
-            }
-          }
+          includeVariants: true
         })
       }
     );
