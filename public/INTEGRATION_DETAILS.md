@@ -2,10 +2,13 @@
 
 ## Product Data Exports
 
-Your complete product catalog is available in two formats:
+All 136 products can be exported dynamically:
 
-- **JSON Format**: `/product-export.json` - [Download JSON](./product-export.json)
-- **CSV Format**: `/product-export.csv` - [Download CSV](./product-export.csv)
+**Export Page**: Navigate to `/export-products` in your app to download:
+- **JSON Format** - All products in structured JSON
+- **CSV Format** - All products in spreadsheet format
+
+Both exports include all product details, images, pricing, stock status, and Wix IDs.
 
 ## Database Schema
 
@@ -163,7 +166,8 @@ All products currently under: **The Beauty Vault**
 
 ## Notes
 
-- All 13 products are in the database but none have been synced to Wix yet (wix_id is null)
+- All 136 products are in the database but none have been synced to Wix yet (wix_id is null)
 - Price format: Regular price + discounted price available
 - Stock tracking: Boolean in_stock flag, optional stock_quantity
 - Image CDN: All images hosted on Shopify CDN with versioned URLs
+- Export all products via the `/export-products` page in JSON or CSV format

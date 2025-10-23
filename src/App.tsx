@@ -10,6 +10,7 @@ import FragranceQuiz from "./pages/FragranceQuiz";
 import Rewards from "./pages/Rewards";
 import SyncProducts from "./pages/SyncProducts";
 import ImportCSV from "./pages/ImportCSV";
+import ExportProducts from "./pages/ExportProducts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/rewards" element={<Rewards />} />
           <Route path="/sync-products" element={<SyncProducts />} />
           <Route path="/import-csv" element={<ImportCSV />} />
+          <Route path="/export-products" element={<ExportProducts />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
