@@ -53,26 +53,34 @@ serve(async (req) => {
         const wixProduct = {
           name: product.name,
           description: product.description || undefined,
-          productType: 'physical', // Wix requires: physical or digital
-          priceData: {
-            price: product.price.toString(),
-            currency: product.currency,
-            discountedPrice: product.discounted_price?.toString() || undefined
-          },
-          stock: {
-            trackInventory: true,
-            inStock: product.in_stock,
-            quantity: product.stock_quantity || 0
+          productType: 'PHYSICAL',
+          physicalProperties: {},
+          variantsInfo: {
+            variants: [
+              {
+                price: {
+                  actualPrice: {
+                    amount: product.price.toString(),
+                    currency: product.currency
+                  }
+                },
+                physicalProperties: {},
+                stock: {
+                  trackInventory: true,
+                  inStock: product.in_stock,
+                  quantity: product.stock_quantity || 0
+                }
+              }
+            ]
           },
           visible: true,
-          // Store our category in additionalInfoSections or customTextFields
           brand: product.brand || undefined
         };
 
         console.log(`Creating product in Wix: ${product.name}`);
 
         const wixResponse = await fetch(
-          `https://www.wixapis.com/stores/v1/products`,
+          `https://www.wixapis.com/stores/v3/products`,
           {
             method: 'POST',
             headers: {
