@@ -5,6 +5,7 @@ import { createWixCheckout, WixProduct } from '@/lib/wix';
 export interface CartItem {
   product: WixProduct;
   productId: string;
+  wixId?: string;
   variantTitle?: string;
   price: {
     amount: string;
@@ -86,10 +87,16 @@ export const useCartStore = create<CartStore>()(
         const { items, setLoading, setCheckoutUrl } = get();
         if (items.length === 0) return;
 
+        // Check if all items have wix_id
+        const itemsWithoutWixId = items.filter(item => !item.wixId);
+        if (itemsWithoutWixId.length > 0) {
+          throw new Error('Some products are not available for checkout. Please refresh and try again.');
+        }
+
         setLoading(true);
         try {
           const wixItems = items.map(item => ({
-            productId: item.productId,
+            productId: item.wixId!,
             quantity: item.quantity,
             options: item.selectedOptions
           }));
