@@ -56,6 +56,21 @@ const ProductDetail = () => {
     }
   }, [product?.id]);
 
+  // Check auth status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -85,23 +100,8 @@ const ProductDetail = () => {
     );
   }
 
-  const displayPrice = product.discounted_price || product.price;
-  const hasDiscount = product.discounted_price && product.discounted_price < product.price;
-
-  // Check auth status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
-    };
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user || null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const displayPrice = product?.discounted_price || product?.price;
+  const hasDiscount = product?.discounted_price && product.discounted_price < product.price;
 
   const handleAddToCart = () => {
     addItem({
