@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import StarRating from "@/components/StarRating";
 
 const ProductDetail = () => {
   const { handle } = useParams();
@@ -179,6 +180,18 @@ const ProductDetail = () => {
               )}
             </div>
 
+            {/* Rating */}
+            {product.rating && (
+              <div className="py-3">
+                <StarRating
+                  rating={product.rating}
+                  totalReviews={product.total_reviews}
+                  source={product.rating_source}
+                  size="md"
+                />
+              </div>
+            )}
+
             {/* Price */}
             <div className="mb-6 space-y-3">
               {hasDiscount ? (
@@ -269,6 +282,15 @@ const ProductDetail = () => {
             <div className="prose max-w-none">
               <p className="text-muted-foreground">{product.description}</p>
             </div>
+          </div>
+        )}
+
+        {/* Rating Disclaimer */}
+        {product.rating && (
+          <div className="mt-12 p-6 bg-muted/30 rounded-lg border border-border">
+            <p className="text-sm text-muted-foreground text-center">
+              Customer ratings imported from verified retailer sources. Product reviews not yet collected on Beauty Vault.
+            </p>
           </div>
         )}
       </main>

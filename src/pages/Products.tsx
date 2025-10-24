@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import RecommendedProducts from "@/components/RecommendedProducts";
+import StarRating from "@/components/StarRating";
 
 const Products = () => {
   const { products, loading, error } = useProducts();
@@ -188,6 +189,18 @@ const Products = () => {
                         <h3 className="font-medium mb-2 group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem]">
                           {product.name}
                         </h3>
+                        
+                        {product.rating && (
+                          <div className="mb-3">
+                            <StarRating
+                              rating={product.rating}
+                              totalReviews={product.total_reviews}
+                              source={product.rating_source}
+                              size="sm"
+                            />
+                          </div>
+                        )}
+                        
                         <div className="mb-3 mt-auto">
                           {hasDiscount ? (
                             <div className="flex items-center gap-2">
@@ -220,6 +233,13 @@ const Products = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Rating Disclaimer */}
+        <div className="mt-12 p-6 bg-muted/30 rounded-lg border border-border">
+          <p className="text-sm text-muted-foreground text-center">
+            Customer ratings imported from verified retailer sources. Product reviews not yet collected on Beauty Vault.
+          </p>
         </div>
       </main>
 

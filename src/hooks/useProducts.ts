@@ -16,6 +16,9 @@ export interface Product {
   in_stock: boolean;
   category?: string;
   brand?: string;
+  rating?: number;
+  rating_source?: string;
+  total_reviews?: number;
   created_at?: string;
   updated_at?: string;
 }

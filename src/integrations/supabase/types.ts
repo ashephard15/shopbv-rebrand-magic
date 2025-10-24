@@ -69,8 +69,11 @@ export type Database = {
           in_stock: boolean | null
           name: string
           price: number
+          rating: number | null
+          rating_source: string | null
           slug: string
           stock_quantity: number | null
+          total_reviews: number | null
           updated_at: string | null
           wix_id: string | null
         }
@@ -87,8 +90,11 @@ export type Database = {
           in_stock?: boolean | null
           name: string
           price: number
+          rating?: number | null
+          rating_source?: string | null
           slug: string
           stock_quantity?: number | null
+          total_reviews?: number | null
           updated_at?: string | null
           wix_id?: string | null
         }
@@ -105,8 +111,11 @@ export type Database = {
           in_stock?: boolean | null
           name?: string
           price?: number
+          rating?: number | null
+          rating_source?: string | null
           slug?: string
           stock_quantity?: number | null
+          total_reviews?: number | null
           updated_at?: string | null
           wix_id?: string | null
         }
