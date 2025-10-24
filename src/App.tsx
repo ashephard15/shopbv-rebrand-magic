@@ -12,6 +12,7 @@ import SyncProducts from "./pages/SyncProducts";
 import ImportCSV from "./pages/ImportCSV";
 import ExportProducts from "./pages/ExportProducts";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/sync-products" element={<SyncProducts />} />
           <Route path="/import-csv" element={<ImportCSV />} />
           <Route path="/export-products" element={<ExportProducts />} />
+          <Route path="/auth" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

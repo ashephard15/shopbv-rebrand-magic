@@ -15,7 +15,55 @@ serve(async (req) => {
   }
 
   try {
-    const { items } = await req.json();
+    const body = await req.json();
+    
+    // Input validation
+    if (!body.items || !Array.isArray(body.items)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input: items must be an array' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (body.items.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input: items array cannot be empty' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (body.items.length > 50) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input: maximum 50 items allowed' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate each item
+    for (const item of body.items) {
+      if (!item.productId || typeof item.productId !== 'string') {
+        return new Response(
+          JSON.stringify({ error: 'Invalid input: productId must be a string' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (!item.quantity || typeof item.quantity !== 'number' || item.quantity < 1 || item.quantity > 1000) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid input: quantity must be a number between 1 and 1000' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (item.options && typeof item.options !== 'object') {
+        return new Response(
+          JSON.stringify({ error: 'Invalid input: options must be an object' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    const { items } = body;
     console.log('Creating Wix checkout for items:', items);
 
     // Step 1: Create checkout with line items

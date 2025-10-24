@@ -13,6 +13,15 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -22,7 +31,35 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log('Fetching all products from database...');
+    // Verify user is authenticated and has admin role
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      console.error('Auth error:', userError);
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Check if user has admin role
+    const { data: roles, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .single();
+
+    if (roleError || !roles) {
+      console.error('Not an admin:', user.id);
+      return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    console.log('Admin user verified, fetching products...');
 
     // Fetch all products
     const { data: products, error } = await supabase
@@ -39,6 +76,17 @@ serve(async (req) => {
 
     const url = new URL(req.url);
     const format = url.searchParams.get('format') || 'json';
+
+    // Validate format parameter
+    if (!['json', 'csv'].includes(format)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid format. Use "json" or "csv"' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     if (format === 'csv') {
       // Generate CSV

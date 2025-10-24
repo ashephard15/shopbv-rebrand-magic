@@ -19,10 +19,49 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     console.log('Starting database to Wix product sync...');
     
     // Initialize Supabase client
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
+    // Verify user is authenticated and has admin role
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      console.error('Auth error:', userError);
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Check if user has admin role
+    const { data: roles, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .single();
+
+    if (roleError || !roles) {
+      console.error('Not an admin:', user.id);
+      return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    console.log('Admin user verified, fetching products without Wix ID...');
 
     // Fetch products from database that don't have a wix_id yet
     const { data: dbProducts, error: dbError } = await supabase
