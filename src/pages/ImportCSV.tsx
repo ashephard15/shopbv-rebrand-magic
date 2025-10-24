@@ -49,7 +49,7 @@ const ImportCSV = () => {
               : null,
             image_url: row['Image Src'] || null,
             image_alt: row.Title || null,
-            stock_quantity: null,
+            stock_quantity: 1,
             in_stock: row.Published?.toLowerCase() === 'true',
             category: row.Type || null,
             brand: row.Vendor || null,
