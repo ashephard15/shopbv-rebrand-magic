@@ -2,7 +2,7 @@ import { Search, User, Menu, LogOut, Settings, Upload, Download } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import logo from "@/assets/beauty-vault-logo.png";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CartDrawer } from "@/components/CartDrawer";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -19,8 +19,6 @@ import { toast } from "sonner";
 const Navigation = () => {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,15 +62,6 @@ const Navigation = () => {
     navigate('/');
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate('/products');
-    }
-  };
-
   return (
     <>
       {/* Top banner */}
@@ -95,16 +84,14 @@ const Navigation = () => {
 
             {/* Search bar - centered and prominent */}
             <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-              <form onSubmit={handleSearch} className="relative w-full">
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search The Beauty Vault"
                   className="pl-10 w-full bg-secondary border-none focus-visible:ring-1"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-              </form>
+              </div>
             </div>
 
             {/* Right actions */}

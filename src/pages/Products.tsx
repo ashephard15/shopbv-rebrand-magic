@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useProducts, Product } from "@/hooks/useProducts";
@@ -15,8 +15,6 @@ import StarRating from "@/components/StarRating";
 const Products = () => {
   const { products, loading, error } = useProducts();
   const addItem = useCartStore(state => state.addItem);
-  const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get('search') || '';
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     priceRange: [0, 500],
@@ -27,19 +25,6 @@ const Products = () => {
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const price = product.discounted_price || product.price;
-      
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesName = product.name.toLowerCase().includes(query);
-        const matchesDescription = product.description?.toLowerCase().includes(query) || false;
-        const matchesBrand = product.brand?.toLowerCase().includes(query) || false;
-        const matchesCategory = product.category?.toLowerCase().includes(query) || false;
-        
-        if (!matchesName && !matchesDescription && !matchesBrand && !matchesCategory) {
-          return false;
-        }
-      }
       
       // Category filter
       if (filters.categories.length > 0 && !filters.categories.includes(product.category || '')) {
@@ -58,7 +43,7 @@ const Products = () => {
 
       return true;
     });
-  }, [products, filters, searchQuery]);
+  }, [products, filters]);
 
   const handleAddToCart = (product: Product) => {
     const cartItem = {
@@ -132,11 +117,9 @@ const Products = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">
-            {searchQuery ? `Search results for "${searchQuery}"` : 'All Products'}
-          </h1>
+          <h1 className="text-4xl font-bold mb-4">All Products</h1>
           <p className="text-muted-foreground">
-            {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} {searchQuery ? 'found' : 'available'}
+            {filteredProducts.length} products available
           </p>
         </div>
 
