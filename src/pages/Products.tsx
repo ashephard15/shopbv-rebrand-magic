@@ -24,6 +24,16 @@ const Products = () => {
     return products.filter((product) => {
       const price = product.discounted_price || product.price;
       
+      // Category filter
+      if (filters.categories.length > 0 && !filters.categories.includes(product.category || '')) {
+        return false;
+      }
+
+      // Brand filter
+      if (filters.brands.length > 0 && !filters.brands.includes(product.brand || '')) {
+        return false;
+      }
+      
       // Price filter
       if (price < filters.priceRange[0] || price > filters.priceRange[1]) {
         return false;
