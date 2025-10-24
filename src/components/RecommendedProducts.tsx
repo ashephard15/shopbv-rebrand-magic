@@ -30,13 +30,21 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
       
       recommendations = allProducts
         .filter(p => viewedCategories.includes(p.category) && !viewedIds.includes(p.id))
+        .sort(() => Math.random() - 0.5)
         .slice(0, 12);
     }
     
-    // Fallback to random products if not enough recommendations
+    // Fallback: Select products from middle/end of array to avoid showing same as main grid
+    // Main grid shows newest first, so we pick from older products randomly
     if (recommendations.length < 12) {
-      const shuffled = [...allProducts].sort(() => Math.random() - 0.5);
-      recommendations = shuffled.slice(0, 12);
+      const availableProducts = allProducts.filter(p => !viewedIds.includes(p.id));
+      // Skip the first 20 products (which appear at top of main grid) and randomize the rest
+      const skipFirst = Math.min(20, Math.floor(availableProducts.length * 0.3));
+      const poolForRecommendations = availableProducts.slice(skipFirst);
+      
+      const shuffled = [...poolForRecommendations].sort(() => Math.random() - 0.5);
+      const needed = 12 - recommendations.length;
+      recommendations = [...recommendations, ...shuffled.slice(0, needed)];
     }
     
     setRecommendedProducts(recommendations);
