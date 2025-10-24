@@ -9,6 +9,7 @@ import ProductFilters, { FilterState } from "@/components/ProductFilters";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import RecommendedProducts from "@/components/RecommendedProducts";
 
 const Products = () => {
   const { products, loading, error } = useProducts();
@@ -120,6 +121,9 @@ const Products = () => {
             {filteredProducts.length} products available
           </p>
         </div>
+
+        {/* Recommended Products */}
+        <RecommendedProducts allProducts={products} />
 
         <div className="flex gap-8">
           {/* Desktop Filters */}

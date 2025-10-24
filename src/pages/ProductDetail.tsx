@@ -42,6 +42,19 @@ const ProductDetail = () => {
     loadProduct();
   }, [handle]);
 
+  // Track product views for recommendations
+  useEffect(() => {
+    if (product?.id) {
+      const viewedProducts = localStorage.getItem('recentlyViewed');
+      const viewedIds: string[] = viewedProducts ? JSON.parse(viewedProducts) : [];
+      
+      if (!viewedIds.includes(product.id)) {
+        const updatedIds = [product.id, ...viewedIds].slice(0, 20);
+        localStorage.setItem('recentlyViewed', JSON.stringify(updatedIds));
+      }
+    }
+  }, [product?.id]);
+
   if (loading) {
     return (
       <div className="min-h-screen">
