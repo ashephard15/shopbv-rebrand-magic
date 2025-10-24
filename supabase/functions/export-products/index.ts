@@ -89,18 +89,32 @@ serve(async (req) => {
     }
 
     if (format === 'csv') {
-      // Generate CSV
+      // Generate CSV formatted for Wix import
       const headers = [
-        'id', 'name', 'description', 'slug', 'price', 'discounted_price',
-        'currency', 'brand', 'category', 'image_url', 'image_alt',
-        'in_stock', 'stock_quantity', 'wix_id', 'created_at', 'updated_at'
+        'handleId', 'name', 'description', 'price', 'currency',
+        'brand', 'category', 'image_url', 'inventory', 'wix_id'
       ];
 
       const csvRows = [headers.join(',')];
 
       for (const product of products || []) {
+        const handleId = product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        
+        const rowData = {
+          handleId,
+          name: product.name,
+          description: product.description || '',
+          price: product.price,
+          currency: product.currency,
+          brand: product.brand || '',
+          category: product.category || '',
+          image_url: product.image_url || '',
+          inventory: 'inStock',
+          wix_id: product.wix_id || ''
+        };
+
         const row = headers.map(header => {
-          const value = product[header];
+          const value = rowData[header as keyof typeof rowData];
           // Escape quotes and wrap in quotes if contains comma or quote
           if (value === null || value === undefined) return '';
           const strValue = String(value);
@@ -118,7 +132,7 @@ serve(async (req) => {
         headers: {
           ...corsHeaders,
           'Content-Type': 'text/csv',
-          'Content-Disposition': 'attachment; filename="products-export.csv"',
+          'Content-Disposition': 'attachment; filename="wix-products-import.csv"',
         },
       });
     }
