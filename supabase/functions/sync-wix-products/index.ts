@@ -90,6 +90,10 @@ serve(async (req) => {
     // Create each product in Wix
     for (const product of dbProducts) {
       try {
+        // Calculate discount if applicable
+        const hasDiscount = product.discounted_price && product.discounted_price < product.price;
+        const discountValue = hasDiscount ? (Number(product.price) - Number(product.discounted_price)) : 0;
+        
         const wixProduct = {
           name: product.name,
           handleId: product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
@@ -97,11 +101,29 @@ serve(async (req) => {
           productType: 'physical',
           priceData: {
             price: product.price.toString(),
-            currency: product.currency
+            currency: product.currency,
+            ...(hasDiscount && {
+              discountedPrice: product.discounted_price.toString()
+            })
           },
-          inventory: 'inStock',
+          stock: {
+            trackInventory: product.stock_quantity !== null,
+            ...(product.stock_quantity !== null && { quantity: product.stock_quantity }),
+            inventoryStatus: product.in_stock ? 'IN_STOCK' : 'OUT_OF_STOCK'
+          },
           visible: true,
-          brand: product.brand || undefined
+          brand: product.brand || undefined,
+          ...(product.category && { collections: [{ name: product.category }] }),
+          ...(product.image_url && { 
+            media: { 
+              items: [{ 
+                url: product.image_url,
+                mediaType: 'IMAGE',
+                ...(product.image_alt && { altText: product.image_alt })
+              }] 
+            } 
+          }),
+          ...(hasDiscount && { ribbon: 'SALE' })
         };
 
         console.log(`Creating product in Wix: ${product.name}`);
