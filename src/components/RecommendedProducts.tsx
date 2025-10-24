@@ -121,7 +121,7 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
 
       <div
         id="recommendations-scroll"
-        className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+        className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth pr-4"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {recommendedProducts.map((product) => {
