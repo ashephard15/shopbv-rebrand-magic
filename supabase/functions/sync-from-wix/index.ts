@@ -121,25 +121,40 @@ serve(async (req) => {
 
         console.log(`Processing: ${productName} (ID: ${wixId})`);
 
-        // Try to match by name first (case-insensitive)
-        const { data: existingProducts, error: searchError } = await supabase
+        // First try to match by wix_id (most reliable)
+        let dbProduct = null;
+        const { data: productByWixId, error: wixIdError } = await supabase
           .from('products')
           .select('*')
-          .ilike('name', productName)
-          .limit(1);
+          .eq('wix_id', wixId)
+          .limit(1)
+          .single();
 
-        if (searchError) {
-          console.error(`Error searching for product ${productName}:`, searchError);
-          errors.push({ product: productName, error: 'Database search failed' });
-          continue;
+        if (!wixIdError && productByWixId) {
+          dbProduct = productByWixId;
+          console.log(`Matched by Wix ID: ${productName}`);
+        } else {
+          // Fall back to matching by name (case-insensitive)
+          const { data: existingProducts, error: searchError } = await supabase
+            .from('products')
+            .select('*')
+            .ilike('name', productName)
+            .limit(1);
+
+          if (searchError) {
+            console.error(`Error searching for product ${productName}:`, searchError);
+            errors.push({ product: productName, error: 'Database search failed' });
+            continue;
+          }
+
+          if (!existingProducts || existingProducts.length === 0) {
+            console.log(`Product not found in database: ${productName}, skipping`);
+            continue;
+          }
+
+          dbProduct = existingProducts[0];
+          console.log(`Matched by name: ${productName}`);
         }
-
-        if (!existingProducts || existingProducts.length === 0) {
-          console.log(`Product not found in database: ${productName}, skipping`);
-          continue;
-        }
-
-        const dbProduct = existingProducts[0];
 
         // Prepare update data
         const updateData: any = {
