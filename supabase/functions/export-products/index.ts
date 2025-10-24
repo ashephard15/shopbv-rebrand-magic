@@ -89,33 +89,67 @@ serve(async (req) => {
     }
 
     if (format === 'csv') {
-      // Generate CSV formatted for Wix import
+      // Generate CSV formatted for Wix import template
       const headers = [
-        'handleId', 'name', 'description', 'price', 'currency',
-        'brand', 'category', 'image_url', 'inventory', 'wix_id'
+        'handleId', 'fieldType', 'name', 'description', 'productImageUrl', 'collection', 'sku', 'ribbon',
+        'price', 'surcharge', 'visible', 'discountMode', 'discountValue', 'inventory', 'weight', 'cost',
+        'productOptionName1', 'productOptionType1', 'productOptionDescription1',
+        'productOptionName2', 'productOptionType2', 'productOptionDescription2',
+        'productOptionName3', 'productOptionType3', 'productOptionDescription3',
+        'productOptionName4', 'productOptionType4', 'productOptionDescription4',
+        'productOptionName5', 'productOptionType5', 'productOptionDescription5',
+        'productOptionName6', 'productOptionType6', 'productOptionDescription6',
+        'additionalInfoTitle1', 'additionalInfoDescription1',
+        'additionalInfoTitle2', 'additionalInfoDescription2',
+        'additionalInfoTitle3', 'additionalInfoDescription3',
+        'additionalInfoTitle4', 'additionalInfoDescription4',
+        'additionalInfoTitle5', 'additionalInfoDescription5',
+        'additionalInfoTitle6', 'additionalInfoDescription6',
+        'customTextField1', 'customTextCharLimit1', 'customTextMandatory1', 'brand'
       ];
 
       const csvRows = [headers.join(',')];
 
       for (const product of products || []) {
         const handleId = product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const hasDiscount = product.discounted_price && product.discounted_price < product.price;
+        const discountValue = hasDiscount ? (Number(product.price) - Number(product.discounted_price)).toFixed(2) : '';
         
         const rowData = {
           handleId,
+          fieldType: 'Product',
           name: product.name,
           description: product.description || '',
+          productImageUrl: product.image_url || '',
+          collection: product.category || '',
+          sku: '',
+          ribbon: '',
           price: product.price,
-          currency: product.currency,
-          brand: product.brand || '',
-          category: product.category || '',
-          image_url: product.image_url || '',
-          inventory: 'inStock',
-          wix_id: product.wix_id || ''
+          surcharge: '',
+          visible: 'TRUE',
+          discountMode: hasDiscount ? 'AMOUNT' : '',
+          discountValue: discountValue,
+          inventory: product.in_stock ? 'InStock' : 'OutOfStock',
+          weight: '',
+          cost: '',
+          productOptionName1: '', productOptionType1: '', productOptionDescription1: '',
+          productOptionName2: '', productOptionType2: '', productOptionDescription2: '',
+          productOptionName3: '', productOptionType3: '', productOptionDescription3: '',
+          productOptionName4: '', productOptionType4: '', productOptionDescription4: '',
+          productOptionName5: '', productOptionType5: '', productOptionDescription5: '',
+          productOptionName6: '', productOptionType6: '', productOptionDescription6: '',
+          additionalInfoTitle1: '', additionalInfoDescription1: '',
+          additionalInfoTitle2: '', additionalInfoDescription2: '',
+          additionalInfoTitle3: '', additionalInfoDescription3: '',
+          additionalInfoTitle4: '', additionalInfoDescription4: '',
+          additionalInfoTitle5: '', additionalInfoDescription5: '',
+          additionalInfoTitle6: '', additionalInfoDescription6: '',
+          customTextField1: '', customTextCharLimit1: '', customTextMandatory1: '',
+          brand: product.brand || ''
         };
 
         const row = headers.map(header => {
           const value = rowData[header as keyof typeof rowData];
-          // Escape quotes and wrap in quotes if contains comma or quote
           if (value === null || value === undefined) return '';
           const strValue = String(value);
           if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
