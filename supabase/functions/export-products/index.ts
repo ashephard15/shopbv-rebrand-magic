@@ -110,12 +110,46 @@ serve(async (req) => {
 
       const csvRows = [headers.join(',')];
 
+      // Custom handleId mapping for products with long names
+      const customHandleIds: Record<string, string> = {
+        'Gloss Bomb Stix High-Shine Gloss Stick': 'gloss-bomb-stix',
+        'Glow Face Highlighter': 'glow-highlighter',
+        'Weightless Eye Primer': 'eye-primer-weightless',
+        'Tinted Moisturizer': 'tinted-moisturizer',
+        'Bye Bye Breakout Full Coverage Treatment Cancealer': 'bye-bye-breakout-concealer',
+        'Cleanse Daily Cleanser': 'daily-cleanser',
+        'Fuller Dimensional Brow Kit': 'fuller-brow-kit',
+        'Confidence in Your Beauty Sleep Night Cream': 'beauty-sleep-night-cream',
+        'Cream Natural Matte Foundation': 'natural-matte-foundation',
+        'Pore Perfecting Mattifying Foundation': 'pore-mattifying-foundation',
+        'Lip Butter Balm Treatment': 'lip-butter-balm',
+        'Plumping Lip Gloss': 'plumping-lip-gloss',
+        'Lip Sleeping Mask': 'lip-sleeping-mask',
+        'Beauty Power Move Soft Matte Lipstick': 'power-move-matte-lipstick',
+        'Gloss Bomb Heat Universal Lip Luminizer + Plumper': 'gloss-bomb-heat-plumper',
+        'Lip Glowy Lightweight Hydration Balm with Shea Butter (Mini)': 'lip-glowy-balm-mini',
+        'Makeup Organizer': 'makeup-organizer',
+        '12-Piece All-Purpose Makeup Sponge Set': '12pc-makeup-sponge-set',
+        'Lip Cream': 'lip-cream',
+        'Luminizer + Plumper Lip Gloss': 'luminizer-plumper-gloss',
+        'Niacinamide Pore-Refining Toner Serum with Barbados Cherry': 'niacinamide-pore-toner',
+        '"Dream Lip Kit" Mini Lip Plumper Rosewood Glow & Rich Mauve': 'dream-lip-kit-mini',
+        'Mini Blush and Luminize Trio': 'mini-blush-luminize-trio',
+        'Brow Pencil Waterproof Eyebrow Definer': 'waterproof-brow-pencil',
+        'Niacinamide + Hyaluronic Acid High-Strength Vitamin and Mineral Blemish Formula': 'niacinamide-ha-blemish-formula'
+      };
+
       for (const product of products || []) {
-        // Generate handleId and ensure it's max 50 characters (Wix requirement)
-        let handleId = product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        // Use custom handleId if available, otherwise generate from slug or name
+        let handleId = customHandleIds[product.name] || 
+                       product.slug || 
+                       product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        
+        // Ensure max 50 characters as Wix requirement
         if (handleId.length > 50) {
-          handleId = handleId.substring(0, 50).replace(/-+$/, ''); // Remove trailing hyphens
+          handleId = handleId.substring(0, 50).replace(/-+$/, '');
         }
+        
         const hasDiscount = product.discounted_price && product.discounted_price < product.price;
         const discountValue = hasDiscount ? (Number(product.price) - Number(product.discounted_price)).toFixed(2) : '';
         
