@@ -17,6 +17,7 @@ const ProductDetail = () => {
   const addItem = useCartStore(state => state.addItem);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -86,8 +87,6 @@ const ProductDetail = () => {
 
   const displayPrice = product.discounted_price || product.price;
   const hasDiscount = product.discounted_price && product.discounted_price < product.price;
-
-  const [user, setUser] = useState<any>(null);
 
   // Check auth status
   useEffect(() => {
