@@ -59,10 +59,10 @@ export type Database = {
         Row: {
           brand: string | null
           category: string | null
+          compare_at_price: number | null
           created_at: string | null
           currency: string | null
           description: string | null
-          discounted_price: number | null
           id: string
           image_alt: string | null
           image_url: string | null
@@ -80,10 +80,10 @@ export type Database = {
         Insert: {
           brand?: string | null
           category?: string | null
+          compare_at_price?: number | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
-          discounted_price?: number | null
           id?: string
           image_alt?: string | null
           image_url?: string | null
@@ -101,10 +101,10 @@ export type Database = {
         Update: {
           brand?: string | null
           category?: string | null
+          compare_at_price?: number | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
-          discounted_price?: number | null
           id?: string
           image_alt?: string | null
           image_url?: string | null

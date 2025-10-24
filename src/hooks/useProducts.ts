@@ -9,7 +9,7 @@ export interface Product {
   slug: string;
   price: number;
   currency: string;
-  discounted_price?: number;
+  compare_at_price?: number;
   image_url?: string;
   image_alt?: string;
   stock_quantity?: number;

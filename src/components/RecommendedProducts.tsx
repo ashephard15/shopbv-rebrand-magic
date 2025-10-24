@@ -62,7 +62,7 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
         price: {
           price: product.price.toString(),
           currency: product.currency,
-          discountedPrice: product.discounted_price?.toString()
+          discountedPrice: product.compare_at_price?.toString()
         },
         media: {
           items: product.image_url ? [{
@@ -125,8 +125,8 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {recommendedProducts.map((product) => {
-          const displayPrice = product.discounted_price || product.price;
-          const hasDiscount = product.discounted_price && product.discounted_price < product.price;
+          const displayPrice = product.price;
+          const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
 
           return (
             <div key={product.id} className="flex-shrink-0 w-[calc(20%-12.8px)] min-w-[180px] group flex flex-col">
@@ -154,7 +154,7 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
                         ${displayPrice.toFixed(2)}
                       </p>
                       <p className="text-xs line-through text-muted-foreground">
-                        ${product.price.toFixed(2)}
+                        ${product.compare_at_price!.toFixed(2)}
                       </p>
                     </div>
                   ) : (

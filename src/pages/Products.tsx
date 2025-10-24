@@ -24,7 +24,7 @@ const Products = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const price = product.discounted_price || product.price;
+      const price = product.price;
       
       // Category filter
       if (filters.categories.length > 0 && !filters.categories.includes(product.category || '')) {
@@ -54,7 +54,7 @@ const Products = () => {
         price: {
           price: product.price.toString(),
           currency: product.currency,
-          discountedPrice: product.discounted_price?.toString()
+          discountedPrice: product.compare_at_price?.toString()
         },
         media: {
           items: product.image_url ? [{
@@ -167,8 +167,8 @@ const Products = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filteredProducts.map((product) => {
-                  const displayPrice = product.discounted_price || product.price;
-                  const hasDiscount = product.discounted_price && product.discounted_price < product.price;
+                  const displayPrice = product.price;
+                  const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
 
                   return (
                     <div key={product.id} className="group flex flex-col h-full">
@@ -208,7 +208,7 @@ const Products = () => {
                                 ${displayPrice.toFixed(2)}
                               </p>
                               <p className="text-sm line-through text-muted-foreground">
-                                ${product.price.toFixed(2)}
+                                ${product.compare_at_price!.toFixed(2)}
                               </p>
                             </div>
                           ) : (

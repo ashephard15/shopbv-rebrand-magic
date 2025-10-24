@@ -101,8 +101,8 @@ const ProductDetail = () => {
     );
   }
 
-  const displayPrice = product?.discounted_price || product?.price;
-  const hasDiscount = product?.discounted_price && product.discounted_price < product.price;
+  const displayPrice = product?.price;
+  const hasDiscount = product?.compare_at_price && product.compare_at_price > product.price;
 
   const handleAddToCart = () => {
     addItem({
@@ -113,7 +113,7 @@ const ProductDetail = () => {
         price: {
           price: product.price.toString(),
           currency: product.currency,
-          discountedPrice: product.discounted_price?.toString()
+          discountedPrice: product.compare_at_price?.toString()
         },
         media: {
           items: product.image_url ? [{
@@ -201,7 +201,7 @@ const ProductDetail = () => {
                       ${displayPrice.toFixed(2)}
                     </span>
                     <span className="text-xl line-through text-muted-foreground">
-                      ${product.price.toFixed(2)}
+                      ${product.compare_at_price!.toFixed(2)}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">{product.currency}</p>
