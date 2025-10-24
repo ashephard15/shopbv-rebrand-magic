@@ -203,10 +203,13 @@ const Products = () => {
                         
                         <div className="mb-3 mt-auto">
                           {hasDiscount ? (
-                            <div className="flex items-center gap-2">
+                            <div className="space-y-1">
                               <p className="text-xl font-bold text-destructive">
                                 ${displayPrice.toFixed(2)}
                               </p>
+                              <div className="text-xs text-muted-foreground">
+                                compared to
+                              </div>
                               <p className="text-sm line-through text-muted-foreground">
                                 ${product.compare_at_price!.toFixed(2)}
                               </p>

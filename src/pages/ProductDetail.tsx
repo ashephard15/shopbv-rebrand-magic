@@ -200,11 +200,14 @@ const ProductDetail = () => {
                     <span className="text-3xl font-bold text-destructive">
                       ${displayPrice.toFixed(2)}
                     </span>
-                    <span className="text-xl line-through text-muted-foreground">
-                      ${product.compare_at_price!.toFixed(2)}
-                    </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{product.currency}</p>
+                  <div className="text-sm text-muted-foreground mt-2">
+                    compared to
+                  </div>
+                  <span className="text-xl line-through text-muted-foreground">
+                    ${product.compare_at_price!.toFixed(2)}
+                  </span>
+                  <p className="text-sm text-muted-foreground mt-2">{product.currency}</p>
                 </div>
               ) : (
                 <div className="flex items-baseline gap-2">
