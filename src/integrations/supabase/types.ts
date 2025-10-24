@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      points_history: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          order_amount: number | null
+          points_earned: number
+          points_spent: number | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_amount?: number | null
+          points_earned: number
+          points_spent?: number | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          order_amount?: number | null
+          points_earned?: number
+          points_spent?: number | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "points_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand: string | null
@@ -68,6 +109,39 @@ export type Database = {
           stock_quantity?: number | null
           updated_at?: string | null
           wix_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          membership_tier: string
+          points_balance: number
+          total_spent: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          membership_tier?: string
+          points_balance?: number
+          total_spent?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          membership_tier?: string
+          points_balance?: number
+          total_spent?: number
+          updated_at?: string | null
         }
         Relationships: []
       }

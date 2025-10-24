@@ -116,8 +116,15 @@ const Navigation = () => {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/rewards" className="cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" />
+                        My Rewards
+                      </Link>
+                    </DropdownMenuItem>
                     {isAdmin && (
                       <>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                           <Link to="/export-products" className="cursor-pointer">
                             <Download className="mr-2 h-4 w-4" />
@@ -130,9 +137,9 @@ const Navigation = () => {
                             Sync Products
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
                       </>
                     )}
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout

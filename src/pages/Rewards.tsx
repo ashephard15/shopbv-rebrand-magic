@@ -1,12 +1,53 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Gift, Star, Crown, Gem, Heart, ShoppingBag, Calendar, Zap } from "lucide-react";
+import { Sparkles, Gift, Star, Crown, Gem, Heart, ShoppingBag, Calendar, Zap, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Rewards = () => {
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+      
+      if (session?.user) {
+        // Fetch user profile
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        
+        setProfile(data);
+      }
+      setLoading(false);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const getTierInfo = (tier: string) => {
+    const tierMap: any = {
+      'insider': { name: 'Insider', icon: Star, color: 'text-pink-600', multiplier: 1 },
+      'vip': { name: 'VIP', icon: Crown, color: 'text-purple-600', multiplier: 1.25 },
+      'elite': { name: 'Elite', icon: Gem, color: 'text-fuchsia-600', multiplier: 1.5 }
+    };
+    return tierMap[tier] || tierMap.insider;
+  };
+
   const benefits = [
     {
       icon: ShoppingBag,
@@ -91,6 +132,55 @@ const Rewards = () => {
       <Navigation />
 
       <main>
+        {/* User Dashboard Section - Only show if logged in */}
+        {user && profile && (
+          <section className="py-12 bg-gradient-to-br from-pink-500 via-purple-500 to-fuchsia-600 text-white">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-semibold mb-1">Welcome back, {profile.full_name || 'Member'}!</h2>
+                  <div className="flex items-center justify-center gap-2">
+                    {(() => {
+                      const tierInfo = getTierInfo(profile.membership_tier);
+                      const TierIcon = tierInfo.icon;
+                      return (
+                        <>
+                          <TierIcon className="w-5 h-5" />
+                          <span className="font-medium">{tierInfo.name} Member</span>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-sm text-white/80 mb-2">Points Balance</p>
+                      <p className="text-4xl font-bold">{profile.points_balance || 0}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-sm text-white/80 mb-2">Total Spent</p>
+                      <p className="text-4xl font-bold">${(profile.total_spent || 0).toFixed(0)}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-sm text-white/80 mb-2">Points Multiplier</p>
+                      <div className="flex items-center justify-center gap-2">
+                        <TrendingUp className="w-6 h-6" />
+                        <p className="text-4xl font-bold">{getTierInfo(profile.membership_tier).multiplier}x</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Hero Section */}
         <section className="relative bg-gradient-to-br from-pink-500 via-purple-500 to-fuchsia-600 text-white py-20">
           <div className="absolute inset-0 bg-black/20" />
@@ -108,8 +198,9 @@ const Rewards = () => {
               <Button
                 size="lg"
                 className="bg-white text-purple-600 hover:bg-gray-100 rounded-full px-8 text-lg"
+                asChild
               >
-                Join Free Today
+                <Link to="/auth">Join Free Today</Link>
               </Button>
             </div>
           </div>
@@ -249,8 +340,9 @@ const Rewards = () => {
               <Button
                 size="lg"
                 className="bg-white text-purple-600 hover:bg-gray-100 rounded-full px-8"
+                asChild
               >
-                Sign Up Free
+                <Link to="/auth">Sign Up Free</Link>
               </Button>
               <Button
                 size="lg"

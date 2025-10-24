@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Heart, ChevronLeft } from "lucide-react";
+import { Heart, ChevronLeft, Sparkles } from "lucide-react";
 import { Product } from "@/hooks/useProducts";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
@@ -86,6 +86,23 @@ const ProductDetail = () => {
 
   const displayPrice = product.discounted_price || product.price;
   const hasDiscount = product.discounted_price && product.discounted_price < product.price;
+
+  const [user, setUser] = useState<any>(null);
+
+  // Check auth status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleAddToCart = () => {
     addItem({
@@ -207,6 +224,23 @@ const ProductDetail = () => {
                 <Heart className="w-4 h-4 mr-2" />
                 Add to Wishlist
               </Button>
+            </div>
+
+            {/* Earn Points */}
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <span className="font-medium">
+                  Earn {Math.floor(displayPrice)} points on this purchase
+                </span>
+              </div>
+              {!user && (
+                <Link to="/auth">
+                  <Button variant="link" size="sm" className="p-0 h-auto">
+                    Sign in or create an account
+                  </Button>
+                </Link>
+              )}
             </div>
 
             {/* Stock Status */}
