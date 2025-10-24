@@ -121,7 +121,7 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
 
       <div
         id="recommendations-scroll"
-        className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth pr-4"
+        className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {recommendedProducts.map((product) => {
@@ -129,8 +129,8 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
           const hasDiscount = product.discounted_price && product.discounted_price < product.price;
 
           return (
-            <div key={product.id} className="flex-shrink-0 w-48 group">
-              <Link to={`/product/${product.slug}`}>
+            <div key={product.id} className="flex-shrink-0 w-[calc(20%-12.8px)] min-w-[180px] group flex flex-col">
+              <Link to={`/product/${product.slug}`} className="flex-1 flex flex-col">
                 <div className="aspect-square bg-secondary/20 rounded-lg overflow-hidden mb-3">
                   {product.image_url ? (
                     <img
@@ -147,7 +147,7 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
                 <h3 className="font-medium text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                   {product.name}
                 </h3>
-                <div className="mb-2">
+                <div className="mb-2 mt-auto">
                   {hasDiscount ? (
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-destructive">
@@ -170,7 +170,7 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
                   e.preventDefault();
                   handleAddToCart(product);
                 }}
-                className="w-full"
+                className="w-full mt-2"
               >
                 Add to bag
               </Button>
