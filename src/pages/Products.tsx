@@ -150,7 +150,7 @@ const Products = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filteredProducts.map((product) => {
                   const displayPrice = product.discounted_price || product.price;
                   const hasDiscount = product.discounted_price && product.discounted_price < product.price;
