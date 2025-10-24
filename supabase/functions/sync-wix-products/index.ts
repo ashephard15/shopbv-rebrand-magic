@@ -92,17 +92,14 @@ serve(async (req) => {
       try {
         const wixProduct = {
           name: product.name,
+          handleId: product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           description: product.description || undefined,
           productType: 'physical',
           priceData: {
             price: product.price.toString(),
             currency: product.currency
           },
-          stock: {
-            trackInventory: true,
-            inStock: product.in_stock,
-            quantity: product.stock_quantity || 0
-          },
+          inventory: 'inStock',
           visible: true,
           brand: product.brand || undefined
         };
