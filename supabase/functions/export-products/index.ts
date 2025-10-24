@@ -111,7 +111,11 @@ serve(async (req) => {
       const csvRows = [headers.join(',')];
 
       for (const product of products || []) {
-        const handleId = product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        // Generate handleId and ensure it's max 50 characters (Wix requirement)
+        let handleId = product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        if (handleId.length > 50) {
+          handleId = handleId.substring(0, 50).replace(/-+$/, ''); // Remove trailing hyphens
+        }
         const hasDiscount = product.discounted_price && product.discounted_price < product.price;
         const discountValue = hasDiscount ? (Number(product.price) - Number(product.discounted_price)).toFixed(2) : '';
         
