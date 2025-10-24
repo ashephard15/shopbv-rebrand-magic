@@ -11,16 +11,26 @@ const SyncProducts = () => {
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
 
-  const handleSync = async () => {
+  const handleSyncToWix = async () => {
     setSyncing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('sync-wix-products');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('You must be logged in to sync products');
+      }
+
+      const { data, error } = await supabase.functions.invoke('sync-wix-products', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
       if (error) throw error;
 
       if (data?.success) {
         setLastSync(new Date());
-        toast.success("Products synced!", {
+        toast.success("Synced to Wix!", {
           description: `Successfully synced ${data.synced} products to Wix`,
           position: "top-center"
         });
@@ -38,35 +48,80 @@ const SyncProducts = () => {
     }
   };
 
+  const handleSyncFromWix = async () => {
+    setSyncing(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('You must be logged in to sync products');
+      }
+
+      const { data, error } = await supabase.functions.invoke('sync-from-wix', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setLastSync(new Date());
+        toast.success("Synced from Wix!", {
+          description: `Updated ${data.updated} products with Wix image URLs`,
+          position: "top-center"
+        });
+      } else {
+        throw new Error(data?.error || 'Sync failed');
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      toast.error("Sync failed", {
+        description: error instanceof Error ? error.message : 'Failed to sync from Wix',
+        position: "top-center"
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Navigation />
       
       <main className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto space-y-6">
           <h1 className="text-4xl font-bold mb-8 text-center">Sync Products</h1>
           
-          <Card>
+          {lastSync && (
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <CheckCircle2 className="w-4 h-4 text-green-500" />
+              Last synced: {lastSync.toLocaleString()}
+            </div>
+          )}
+
+          <Card className="border-primary">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <RefreshCw className="w-5 h-5" />
-                Push Products to Wix
+                Pull from Wix (Recommended)
               </CardTitle>
               <CardDescription>
-                Upload your database products to your Wix store. This will create products in Wix
-                for any items that don't already exist there.
+                After uploading the CSV to Wix, pull products back to update image URLs
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {lastSync && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  Last synced: {lastSync.toLocaleString()}
-                </div>
-              )}
+              <div className="bg-muted p-4 rounded-lg space-y-2">
+                <p className="font-medium text-sm">✨ For Image URL Updates:</p>
+                <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground ml-2">
+                  <li>Upload the CSV (from Export page) to your Wix store</li>
+                  <li>Wix automatically downloads and re-hosts the images</li>
+                  <li>Click "Pull from Wix" below to update your database with new URLs</li>
+                </ol>
+              </div>
               
               <Button
-                onClick={handleSync}
+                onClick={handleSyncFromWix}
                 disabled={syncing}
                 size="lg"
                 className="w-full"
@@ -79,20 +134,52 @@ const SyncProducts = () => {
                 ) : (
                   <>
                     <RefreshCw className="w-4 h-4 mr-2" />
-                    Sync Now
+                    Pull from Wix
                   </>
                 )}
               </Button>
+            </CardContent>
+          </Card>
 
-              <div className="text-sm text-muted-foreground space-y-2 pt-4 border-t">
-                <p className="font-medium">What happens when you sync:</p>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-muted-foreground">
+                <RefreshCw className="w-5 h-5" />
+                Push to Wix
+              </CardTitle>
+              <CardDescription>
+                Upload your database products to create new products in Wix
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p className="font-medium">What this does:</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
                   <li>Finds products in database without Wix IDs</li>
                   <li>Creates those products in your Wix store</li>
                   <li>Links database products to Wix products</li>
-                  <li>Preserves all product details and pricing</li>
                 </ul>
               </div>
+              
+              <Button
+                onClick={handleSyncToWix}
+                disabled={syncing}
+                size="lg"
+                variant="outline"
+                className="w-full"
+              >
+                {syncing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Syncing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Push to Wix
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
         </div>
