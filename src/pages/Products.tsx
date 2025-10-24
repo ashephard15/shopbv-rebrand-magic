@@ -156,8 +156,8 @@ const Products = () => {
                   const hasDiscount = product.discounted_price && product.discounted_price < product.price;
 
                   return (
-                    <div key={product.id} className="group">
-                      <Link to={`/product/${product.slug}`}>
+                    <div key={product.id} className="group flex flex-col h-full">
+                      <Link to={`/product/${product.slug}`} className="flex flex-col flex-1">
                         <div className="aspect-square bg-secondary/20 rounded-lg overflow-hidden mb-4">
                           {product.image_url ? (
                             <img
@@ -171,10 +171,10 @@ const Products = () => {
                             </div>
                           )}
                         </div>
-                        <h3 className="font-medium mb-2 group-hover:text-primary transition-colors">
+                        <h3 className="font-medium mb-2 group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem]">
                           {product.name}
                         </h3>
-                        <div className="mb-3">
+                        <div className="mb-3 mt-auto">
                           {hasDiscount ? (
                             <div className="flex items-center gap-2">
                               <p className="text-xl font-bold text-destructive">
@@ -196,7 +196,7 @@ const Products = () => {
                           e.preventDefault();
                           handleAddToCart(product);
                         }}
-                        className="w-full"
+                        className="w-full mt-auto"
                       >
                         Add to Cart
                       </Button>
