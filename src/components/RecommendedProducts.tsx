@@ -161,11 +161,8 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
                       <p className="font-bold text-destructive">
                         ${displayPrice.toFixed(2)}
                       </p>
-                      <div className="text-[10px] text-muted-foreground">
-                        compared to
-                      </div>
-                      <p className="text-xs line-through text-muted-foreground">
-                        ${product.compare_at_price!.toFixed(2)}
+                      <p className="text-[10px] text-muted-foreground">
+                        <span className="line-through">${product.compare_at_price!.toFixed(2)}</span> compared to
                       </p>
                     </div>
                   ) : (

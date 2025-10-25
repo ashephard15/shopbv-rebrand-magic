@@ -207,11 +207,8 @@ const Products = () => {
                               <p className="text-xl font-bold text-destructive">
                                 ${displayPrice.toFixed(2)}
                               </p>
-                              <div className="text-xs text-muted-foreground">
-                                compared to
-                              </div>
-                              <p className="text-sm line-through text-muted-foreground">
-                                ${product.compare_at_price!.toFixed(2)}
+                              <p className="text-sm text-muted-foreground">
+                                <span className="line-through">${product.compare_at_price!.toFixed(2)}</span> compared to
                               </p>
                             </div>
                           ) : (
