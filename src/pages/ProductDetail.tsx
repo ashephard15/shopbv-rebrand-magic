@@ -11,6 +11,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import StarRating from "@/components/StarRating";
+import { useWishlist } from "@/hooks/useWishlist";
 
 const ProductDetail = () => {
   const { handle } = useParams();
@@ -19,6 +20,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -122,9 +124,14 @@ const ProductDetail = () => {
               altText: product.image_alt || product.name
             }
           }] : []
+        },
+        stock: {
+          inStock: product.in_stock,
+          quantity: product.stock_quantity
         }
       },
       productId: product.id,
+      wixId: product.wix_id,
       price: {
         amount: product.price.toString(),
         currency: product.currency
@@ -137,6 +144,14 @@ const ProductDetail = () => {
       description: `${product.name} has been added to your cart`,
       position: "top-center"
     });
+  };
+
+  const handleWishlistToggle = async () => {
+    if (isInWishlist(product.id)) {
+      await removeFromWishlist(product.id);
+    } else {
+      await addToWishlist(product.id);
+    }
   };
 
   return (
@@ -232,9 +247,10 @@ const ProductDetail = () => {
                 variant="outline" 
                 className="w-full"
                 size="lg"
+                onClick={handleWishlistToggle}
               >
-                <Heart className="w-4 h-4 mr-2" />
-                Add to Wishlist
+                <Heart className={`w-4 h-4 mr-2 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                {isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
               </Button>
             </div>
 

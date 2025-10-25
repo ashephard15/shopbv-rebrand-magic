@@ -61,9 +61,19 @@ export const useCartStore = create<CartStore>()(
           get().removeItem(productId);
           return;
         }
+
+        const { items } = get();
+        const item = items.find(i => i.productId === productId);
+        
+        // Check stock quantity if available
+        if (item?.product.stock?.quantity) {
+          if (quantity > item.product.stock.quantity) {
+            return; // Don't allow quantity greater than stock
+          }
+        }
         
         set({
-          items: get().items.map(item =>
+          items: items.map(item =>
             item.productId === productId ? { ...item, quantity } : item
           )
         });
