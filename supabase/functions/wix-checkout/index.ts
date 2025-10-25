@@ -120,12 +120,17 @@ serve(async (req) => {
     }
 
     const urlData = await checkoutUrlResponse.json();
-    const checkoutUrl = urlData.checkoutUrl;
+    let checkoutUrl = urlData.checkoutUrl;
     
     if (!checkoutUrl) {
       console.error('No checkout URL in response:', urlData);
       throw new Error('Wix did not return a checkout URL');
     }
+    
+    // Add channel parameter to prevent password protection
+    const url = new URL(checkoutUrl);
+    url.searchParams.set('channel', 'online_store');
+    checkoutUrl = url.toString();
     
     console.log('Successfully retrieved checkout URL:', checkoutUrl);
 
