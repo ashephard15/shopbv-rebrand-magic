@@ -157,12 +157,12 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
                 </h3>
                 <div className="mb-2 mt-auto">
                   {hasDiscount ? (
-                    <div className="space-y-1">
+                    <div className="flex items-center gap-2">
                       <p className="font-bold text-destructive">
                         ${displayPrice.toFixed(2)}
                       </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        <span className="line-through">${product.compare_at_price!.toFixed(2)}</span> compared to
+                      <p className="text-xs line-through text-muted-foreground">
+                        ${product.compare_at_price!.toFixed(2)}
                       </p>
                     </div>
                   ) : (
