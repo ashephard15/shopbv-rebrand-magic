@@ -99,37 +99,18 @@ serve(async (req) => {
     const checkoutData = await checkoutResponse.json();
     const checkoutId = checkoutData.checkout.id;
     console.log('Checkout created with ID:', checkoutId);
+    console.log('Full checkout data:', JSON.stringify(checkoutData, null, 2));
 
-    // Step 2: Create redirect session
-    const redirectResponse = await fetch(
-      `https://www.wixapis.com/redirect-session/v1/redirect-session`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': WIX_API_KEY!,
-          'Content-Type': 'application/json',
-          'wix-site-id': WIX_SITE_ID!,
-        },
-        body: JSON.stringify({
-          ecomCheckout: {
-            checkoutId: checkoutId
-          },
-          callbacks: {
-            postFlowUrl: req.headers.get('origin') || 'https://your-site.com'
-          }
-        })
-      }
-    );
-
-    if (!redirectResponse.ok) {
-      const errorText = await redirectResponse.text();
-      console.error('Wix redirect API error:', redirectResponse.status, errorText);
-      throw new Error(`Wix redirect API error: ${redirectResponse.status} - ${errorText}`);
+    // Get checkout URL directly from the checkout response
+    let checkoutUrl = checkoutData.checkout?.checkoutUrl;
+    
+    if (!checkoutUrl) {
+      console.log('No direct checkout URL, constructing manually...');
+      // Construct checkout URL manually if not provided
+      checkoutUrl = `https://${WIX_SITE_ID}.wixsite.com/_api/checkout-app/v2/checkout/${checkoutId}`;
     }
-
-    const redirectData = await redirectResponse.json();
-    const checkoutUrl = redirectData.redirectSession.fullUrl;
-    console.log('Successfully created checkout URL');
+    
+    console.log('Successfully created checkout URL:', checkoutUrl);
 
     return new Response(JSON.stringify({ 
       checkout: {
