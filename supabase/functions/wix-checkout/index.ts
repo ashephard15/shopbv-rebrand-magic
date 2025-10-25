@@ -108,6 +108,7 @@ serve(async (req) => {
         headers: {
           'Authorization': WIX_API_KEY!,
           'Content-Type': 'application/json',
+          'wix-site-id': WIX_SITE_ID!,
         },
         body: JSON.stringify({
           ecomCheckout: {
