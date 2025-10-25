@@ -36,8 +36,9 @@ export const CartDrawer = () => {
       }
     } catch (error) {
       console.error('Checkout failed:', error);
-      toast.error('Failed to create checkout', {
-        description: 'Please try again or contact support if the issue persists.'
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create checkout. Please try again.';
+      toast.error('Checkout failed', {
+        description: errorMessage
       });
     }
   };

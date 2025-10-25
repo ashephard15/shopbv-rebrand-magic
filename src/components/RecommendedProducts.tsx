@@ -82,6 +82,7 @@ const RecommendedProducts = ({ allProducts }: RecommendedProductsProps) => {
         }
       },
       productId: product.id,
+      wixId: product.wix_id,
       variantTitle: undefined,
       price: {
         amount: product.price.toString(),
