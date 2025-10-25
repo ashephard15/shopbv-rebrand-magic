@@ -99,18 +99,20 @@ serve(async (req) => {
     const checkoutData = await checkoutResponse.json();
     const checkoutId = checkoutData.checkout.id;
     console.log('Checkout created with ID:', checkoutId);
-    console.log('Full checkout data:', JSON.stringify(checkoutData, null, 2));
+    console.log('Full checkout response:', JSON.stringify(checkoutData, null, 2));
 
-    // Get checkout URL directly from the checkout response
-    let checkoutUrl = checkoutData.checkout?.checkoutUrl;
+    // Try to get the checkout URL from various possible locations in the response
+    let checkoutUrl = 
+      checkoutData.checkout?.checkoutUrl || 
+      checkoutData.checkout?.redirectUrl ||
+      checkoutData.checkout?.url;
     
     if (!checkoutUrl) {
-      console.log('No direct checkout URL, constructing manually...');
-      // Construct checkout URL manually if not provided
-      checkoutUrl = `https://${WIX_SITE_ID}.wixsite.com/_api/checkout-app/v2/checkout/${checkoutId}`;
+      console.error('No checkout URL found in response. Available fields:', Object.keys(checkoutData.checkout));
+      throw new Error('Wix did not return a checkout URL. Please check your Wix store configuration.');
     }
     
-    console.log('Successfully created checkout URL:', checkoutUrl);
+    console.log('Using checkout URL from Wix:', checkoutUrl);
 
     return new Response(JSON.stringify({ 
       checkout: {
