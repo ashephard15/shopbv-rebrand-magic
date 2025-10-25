@@ -28,22 +28,22 @@ export const CartDrawer = () => {
 
   const handleCheckout = async () => {
     try {
-      toast.info('Opening checkout...', {
-        description: 'Complete your purchase in the new tab. After checkout, close that tab to return here.',
-        duration: 5000,
-      });
-      
       await createCheckout();
       const checkoutUrl = useCartStore.getState().checkoutUrl;
       if (checkoutUrl) {
+        toast.info('Opening checkout...', {
+          description: 'Complete your purchase in the new tab.',
+          duration: 3000,
+        });
         window.open(checkoutUrl, '_blank');
         setIsOpen(false);
       }
     } catch (error) {
       console.error('Checkout failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to create checkout. Please try again.';
-      toast.error('Checkout failed', {
-        description: errorMessage
+      toast.error('Checkout Failed', {
+        description: errorMessage,
+        duration: 5000,
       });
     }
   };

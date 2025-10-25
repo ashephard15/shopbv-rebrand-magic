@@ -46,6 +46,14 @@ const Products = () => {
   }, [products, filters]);
 
   const handleAddToCart = (product: Product) => {
+    if (!product.wix_id) {
+      toast.error("Product unavailable", {
+        description: "This product is not available for purchase at the moment.",
+        position: "top-center"
+      });
+      return;
+    }
+
     const cartItem = {
       product: {
         id: product.id,
