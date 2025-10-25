@@ -301,86 +301,98 @@ const ProductDetail = () => {
 
         {/* Product Details & Reviews Tabs */}
         <div className="mt-16">
-          <Tabs defaultValue="details" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="details">Product Details</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews & Videos</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="details" className="mt-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold">About This Product</h3>
-                <div className="prose max-w-none">
-                  <p className="text-muted-foreground">
-                    {product.description || "No description available."}
-                  </p>
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="reviews" className="mt-6 space-y-8">
-              {/* Customer Reviews Section */}
-              {product.rating && (
+          {product.show_reviews_videos ? (
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="details">Product Details</TabsTrigger>
+                <TabsTrigger value="reviews">Reviews & Videos</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="details" className="mt-6">
                 <div className="space-y-4">
-                  <h3 className="text-xl font-semibold">Customer Reviews</h3>
-                  <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg">
-                    <div className="flex flex-col items-center">
-                      <span className="text-3xl font-bold">{product.rating}</span>
-                      <StarRating rating={product.rating} size="sm" showSource={false} />
-                      <span className="text-sm text-muted-foreground mt-1">
-                        {product.total_reviews} reviews
-                      </span>
-                    </div>
-                    <Separator orientation="vertical" className="h-20" />
-                    <p className="text-sm text-muted-foreground flex-1">
-                      These ratings are imported from {product.rating_source || "verified retailer sources"}. 
-                      We'll be adding our own review collection system soon!
+                  <h3 className="text-xl font-semibold">About This Product</h3>
+                  <div className="prose max-w-none">
+                    <p className="text-muted-foreground">
+                      {product.description || "No description available."}
                     </p>
                   </div>
                 </div>
-              )}
+              </TabsContent>
+              
+              <TabsContent value="reviews" className="mt-6 space-y-8">
+                {/* Customer Reviews Section */}
+                {product.rating && (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold">Customer Reviews</h3>
+                    <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg">
+                      <div className="flex flex-col items-center">
+                        <span className="text-3xl font-bold">{product.rating}</span>
+                        <StarRating rating={product.rating} size="sm" showSource={false} />
+                        <span className="text-sm text-muted-foreground mt-1">
+                          {product.total_reviews} reviews
+                        </span>
+                      </div>
+                      <Separator orientation="vertical" className="h-20" />
+                      <p className="text-sm text-muted-foreground flex-1">
+                        These ratings are imported from {product.rating_source || "verified retailer sources"}. 
+                        We'll be adding our own review collection system soon!
+                      </p>
+                    </div>
+                  </div>
+                )}
 
-              {/* Creator Videos Section */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold">Creator Videos</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Watch real creators share their experiences with this product
-                </p>
-                
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {/* Placeholder for video embeds - replace with actual embed codes */}
-                    {[1, 2, 3].map((index) => (
-                      <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                        <div className="p-2">
-                          <div className="aspect-video bg-muted/20 rounded-lg border border-border flex items-center justify-center">
-                            <div className="text-center space-y-2 p-4">
-                              <p className="text-sm font-medium text-muted-foreground">
-                                Video {index} Placeholder
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Add your YouTube or Vimeo embed code here
-                              </p>
+                {/* Creator Videos Section */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold">Creator Videos</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Watch real creators share their experiences with this product
+                  </p>
+                  
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {/* Placeholder for video embeds - replace with actual embed codes */}
+                      {[1, 2, 3].map((index) => (
+                        <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                          <div className="p-2">
+                            <div className="aspect-video bg-muted/20 rounded-lg border border-border flex items-center justify-center">
+                              <div className="text-center space-y-2 p-4">
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  Video {index} Placeholder
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Add your YouTube or Vimeo embed code here
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="hidden md:flex" />
-                  <CarouselNext className="hidden md:flex" />
-                </Carousel>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="hidden md:flex" />
+                    <CarouselNext className="hidden md:flex" />
+                  </Carousel>
 
-                {/* Disclaimer */}
-                <div className="mt-6 p-4 bg-muted/20 rounded-lg border border-border">
-                  <p className="text-xs text-muted-foreground text-center">
-                    Videos featured are from content creators who have given permission for embedding. 
-                    Reviews and ratings are sourced from verified retailers until our internal review system launches.
-                  </p>
+                  {/* Disclaimer */}
+                  <div className="mt-6 p-4 bg-muted/20 rounded-lg border border-border">
+                    <p className="text-xs text-muted-foreground text-center">
+                      Videos featured are from content creators who have given permission for embedding. 
+                      Reviews and ratings are sourced from verified retailers until our internal review system launches.
+                    </p>
+                  </div>
                 </div>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            // Show only product details without tabs when reviews are disabled
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Product Details</h2>
+              <div className="prose max-w-none">
+                <p className="text-muted-foreground">
+                  {product.description || "No description available."}
+                </p>
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
         </div>
       </main>
 

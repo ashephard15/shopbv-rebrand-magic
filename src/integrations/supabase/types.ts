@@ -71,6 +71,7 @@ export type Database = {
           price: number
           rating: number | null
           rating_source: string | null
+          show_reviews_videos: boolean | null
           slug: string
           stock_quantity: number | null
           total_reviews: number | null
@@ -92,6 +93,7 @@ export type Database = {
           price: number
           rating?: number | null
           rating_source?: string | null
+          show_reviews_videos?: boolean | null
           slug: string
           stock_quantity?: number | null
           total_reviews?: number | null
@@ -113,6 +115,7 @@ export type Database = {
           price?: number
           rating?: number | null
           rating_source?: string | null
+          show_reviews_videos?: boolean | null
           slug?: string
           stock_quantity?: number | null
           total_reviews?: number | null

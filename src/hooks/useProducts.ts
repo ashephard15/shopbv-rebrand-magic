@@ -19,6 +19,7 @@ export interface Product {
   rating?: number;
   rating_source?: string;
   total_reviews?: number;
+  show_reviews_videos?: boolean;
   created_at?: string;
   updated_at?: string;
 }
