@@ -10,6 +10,20 @@ import { toast } from "sonner";
 import { Loader2, Sparkles } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { z } from "zod";
+
+const passwordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number');
+
+const emailSchema = z.string().email('Please enter a valid email address');
+
+const fullNameSchema = z.string()
+  .trim()
+  .min(1, 'Name is required')
+  .max(100, 'Name must be less than 100 characters');
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -31,20 +45,44 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !fullName) {
-      toast.error("Please fill in all fields");
-      return;
+    
+    // Validate all inputs
+    try {
+      emailSchema.parse(email);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error("Invalid email", { description: error.errors[0].message });
+        return;
+      }
+    }
+
+    try {
+      passwordSchema.parse(password);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error("Weak password", { description: error.errors[0].message });
+        return;
+      }
+    }
+
+    try {
+      fullNameSchema.parse(fullName);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error("Invalid name", { description: error.errors[0].message });
+        return;
+      }
     }
 
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
-            full_name: fullName,
+            full_name: fullName.trim(),
           }
         }
       });
@@ -201,8 +239,11 @@ const Auth = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        minLength={6}
+                        minLength={8}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Must be at least 8 characters with uppercase, lowercase, and numbers
+                      </p>
                     </div>
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? (
