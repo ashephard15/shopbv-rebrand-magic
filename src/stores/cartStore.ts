@@ -100,9 +100,11 @@ export const useCartStore = create<CartStore>()(
         // Check if all items have wix_id
         const itemsWithoutWixId = items.filter(item => !item.wixId);
         if (itemsWithoutWixId.length > 0) {
+          console.error('Items without wix_id:', itemsWithoutWixId);
           throw new Error('Some products are not available for checkout. Please refresh and try again.');
         }
 
+        console.log('Creating checkout with items:', items);
         setLoading(true);
         try {
           const wixItems = items.map(item => ({
@@ -111,7 +113,9 @@ export const useCartStore = create<CartStore>()(
             options: item.selectedOptions
           }));
           
+          console.log('Calling createWixCheckout with:', wixItems);
           const checkoutUrl = await createWixCheckout(wixItems);
+          console.log('Received checkout URL:', checkoutUrl);
           setCheckoutUrl(checkoutUrl);
         } catch (error) {
           console.error('Failed to create Wix checkout:', error);

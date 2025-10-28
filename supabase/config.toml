@@ -1,4 +1,7 @@
 project_id = "vfktebhuvmsavyczlvze"
 
+[functions.wix-checkout]
+verify_jwt = false
+
 [functions.wix-products]
 verify_jwt = false

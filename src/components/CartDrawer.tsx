@@ -28,8 +28,10 @@ export const CartDrawer = () => {
 
   const handleCheckout = async () => {
     try {
+      console.log('Starting checkout process...');
       await createCheckout();
       const checkoutUrl = useCartStore.getState().checkoutUrl;
+      console.log('Checkout URL:', checkoutUrl);
       if (checkoutUrl) {
         toast.info('Opening checkout...', {
           description: 'Complete your purchase in the new tab.',
