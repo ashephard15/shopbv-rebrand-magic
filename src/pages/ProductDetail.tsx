@@ -115,6 +115,16 @@ const ProductDetail = () => {
   const hasDiscount = product?.compare_at_price && product.compare_at_price > product.price;
 
   const handleAddToCart = () => {
+    console.log('🛒 Adding to cart - Product wix_id:', product.wix_id, 'Full product:', product);
+    
+    if (!product.wix_id) {
+      toast.error("Product unavailable", {
+        description: "This product is not synced with Wix yet.",
+        position: "top-center"
+      });
+      return;
+    }
+    
     addItem({
       product: {
         id: product.id,
