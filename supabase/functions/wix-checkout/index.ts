@@ -129,10 +129,14 @@ serve(async (req) => {
     
     console.log('Wix returned checkout URL:', checkoutUrl);
     
-    // If URL points to custom domain, keep it but ensure proper parameters
+    // Force Wix hosted checkout instead of custom domain
+    // Replace custom domain with Wix's ecommerce domain
     const url = new URL(checkoutUrl);
-    url.searchParams.set('channel', 'online_store');
-    checkoutUrl = url.toString();
+    if (!url.hostname.includes('wix.com')) {
+      // If it's a custom domain, construct Wix hosted checkout URL
+      checkoutUrl = `https://${WIX_SITE_ID}.wixsite.com/ecommerce${url.pathname}${url.search}`;
+      console.log('Replaced custom domain with Wix hosted URL:', checkoutUrl);
+    }
     
     console.log('Final checkout URL:', checkoutUrl);
 
