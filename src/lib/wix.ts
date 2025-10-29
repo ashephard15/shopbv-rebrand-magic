@@ -54,15 +54,29 @@ export async function fetchWixProducts(): Promise<WixProduct[]> {
 
 export async function createWixCheckout(items: WixCartItem[]): Promise<string> {
   try {
+    console.log('Invoking wix-checkout edge function with items:', items);
     const { data, error } = await supabase.functions.invoke('wix-checkout', {
       body: { items }
     });
 
-    if (error) throw error;
+    console.log('Edge function response:', { data, error });
 
-    return data.checkout?.checkoutUrl;
+    if (error) {
+      console.error('Edge function error:', error);
+      throw new Error(error.message || 'Failed to create checkout');
+    }
+
+    if (!data || !data.checkout || !data.checkout.checkoutUrl) {
+      console.error('Invalid response from edge function:', data);
+      throw new Error('Invalid checkout response. Please ensure Wix integration is configured properly.');
+    }
+
+    return data.checkout.checkoutUrl;
   } catch (error) {
     console.error('Error creating Wix checkout:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to create checkout. Please try again or contact support.');
   }
 }
