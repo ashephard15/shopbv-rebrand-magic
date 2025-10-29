@@ -126,8 +126,18 @@ export const useCartStore = create<CartStore>()(
           const checkoutUrl = await createWixCheckout(wixItems);
           console.log('Received checkout URL:', checkoutUrl);
           setCheckoutUrl(checkoutUrl);
+          
+          // Clear cart after successful checkout creation
+          clearCart();
+          
+          toast.success('Redirecting to checkout...', {
+            description: 'Your cart has been cleared'
+          });
         } catch (error) {
           console.error('Failed to create Wix checkout:', error);
+          toast.error('Checkout failed', {
+            description: error instanceof Error ? error.message : 'Please try again'
+          });
           throw error;
         } finally {
           setLoading(false);
