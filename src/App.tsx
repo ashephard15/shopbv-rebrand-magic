@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,7 +18,32 @@ import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  // CRITICAL FIX: Clear corrupted cart data immediately on app load
+  useEffect(() => {
+    try {
+      const cartData = localStorage.getItem('wix-cart');
+      if (cartData) {
+        const parsed = JSON.parse(cartData);
+        const items = parsed?.state?.items || [];
+        
+        // Check if any items are missing wixId
+        const hasInvalidItems = items.some((item: any) => !item.wixId);
+        
+        if (hasInvalidItems) {
+          console.warn('⚠️ CLEARING CORRUPTED CART DATA - Items missing wixId');
+          localStorage.removeItem('wix-cart');
+          // Force reload to reinitialize store
+          window.location.reload();
+        }
+      }
+    } catch (error) {
+      console.error('Error checking cart, clearing storage:', error);
+      localStorage.removeItem('wix-cart');
+    }
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -56,6 +82,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
