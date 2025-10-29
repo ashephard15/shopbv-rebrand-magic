@@ -1,129 +1,33 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, Gift, Star, Crown, Gem, Heart, ShoppingBag, Calendar, Zap, TrendingUp } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Sparkles, Gift, Heart, ShoppingBag, Zap, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 const Rewards = () => {
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
-      
-      if (session?.user) {
-        // Fetch user profile
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-        
-        setProfile(data);
-      }
-      setLoading(false);
-    };
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user || null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const getTierInfo = (tier: string) => {
-    const tierMap: any = {
-      'insider': { name: 'Insider', icon: Star, color: 'text-pink-600', multiplier: 1 },
-      'vip': { name: 'VIP', icon: Crown, color: 'text-purple-600', multiplier: 1.25 },
-      'elite': { name: 'Elite', icon: Gem, color: 'text-fuchsia-600', multiplier: 1.5 }
-    };
-    return tierMap[tier] || tierMap.insider;
-  };
+  const WIX_LOYALTY_URL = "https://manage.wix.com/dashboard/9b424666-ec32-41d3-84d6-c831a2637239/loyalty";
 
   const benefits = [
     {
       icon: ShoppingBag,
       title: "Earn Points on Every Purchase",
-      description: "Get 1 point for every dollar spent",
+      description: "Get rewarded automatically with every order",
     },
     {
       icon: Gift,
-      title: "Birthday Surprise",
-      description: "Select your special gift during your birthday month",
+      title: "Exclusive Perks",
+      description: "Access member-only benefits and rewards",
     },
     {
       icon: Zap,
-      title: "Exclusive Bonus Events",
+      title: "Special Events",
       description: "Double and triple point opportunities",
     },
     {
       icon: Heart,
       title: "Redeem for Rewards",
-      description: "Turn points into dollars off your next purchase",
-    },
-  ];
-
-  const redemptionTiers = [
-    { points: 100, value: "$5", bgColor: "from-pink-100 to-rose-100" },
-    { points: 250, value: "$15", bgColor: "from-purple-100 to-pink-100" },
-    { points: 500, value: "$30", bgColor: "from-fuchsia-100 to-purple-100" },
-    { points: 750, value: "$50", bgColor: "from-violet-100 to-fuchsia-100" },
-    { points: 1000, value: "$75", bgColor: "from-purple-200 to-pink-200" },
-  ];
-
-  const membershipTiers = [
-    {
-      name: "Insider",
-      icon: Star,
-      color: "text-pink-600",
-      bgColor: "bg-pink-50",
-      borderColor: "border-pink-200",
-      requirement: "Free to join",
-      benefits: [
-        "Earn 1 point per $1 spent",
-        "Birthday gift selection",
-        "Exclusive member offers",
-        "Early access to sales",
-      ],
-    },
-    {
-      name: "VIP",
-      icon: Crown,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      borderColor: "border-purple-200",
-      requirement: "Spend $500 in a year",
-      benefits: [
-        "Everything in Insider",
-        "1.25 points per $1 spent",
-        "Free shipping on all orders",
-        "Quarterly bonus point events",
-        "Exclusive VIP-only products",
-      ],
-    },
-    {
-      name: "Elite",
-      icon: Gem,
-      color: "text-fuchsia-600",
-      bgColor: "bg-fuchsia-50",
-      borderColor: "border-fuchsia-200",
-      requirement: "Spend $1,200 in a year",
-      benefits: [
-        "Everything in VIP",
-        "1.5 points per $1 spent",
-        "Private shopping events",
-        "Free beauty consultations",
-        "Birthday month double points",
-        "Exclusive Elite gift with purchase",
-      ],
+      description: "Turn points into savings on future purchases",
     },
   ];
 
@@ -132,55 +36,6 @@ const Rewards = () => {
       <Navigation />
 
       <main>
-        {/* User Dashboard Section - Only show if logged in */}
-        {user && profile && (
-          <section className="py-12 bg-gradient-to-br from-pink-500 via-purple-500 to-fuchsia-600 text-white">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-semibold mb-1">Welcome back, {profile.full_name || 'Member'}!</h2>
-                  <div className="flex items-center justify-center gap-2">
-                    {(() => {
-                      const tierInfo = getTierInfo(profile.membership_tier);
-                      const TierIcon = tierInfo.icon;
-                      return (
-                        <>
-                          <TierIcon className="w-5 h-5" />
-                          <span className="font-medium">{tierInfo.name} Member</span>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-4">
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-6 text-center">
-                      <p className="text-sm text-white/80 mb-2">Points Balance</p>
-                      <p className="text-4xl font-bold">{profile.points_balance || 0}</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-6 text-center">
-                      <p className="text-sm text-white/80 mb-2">Total Spent</p>
-                      <p className="text-4xl font-bold">${(profile.total_spent || 0).toFixed(0)}</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-6 text-center">
-                      <p className="text-sm text-white/80 mb-2">Points Multiplier</p>
-                      <div className="flex items-center justify-center gap-2">
-                        <TrendingUp className="w-6 h-6" />
-                        <p className="text-4xl font-bold">{getTierInfo(profile.membership_tier).multiplier}x</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* Hero Section */}
         <section className="relative bg-gradient-to-br from-pink-500 via-purple-500 to-fuchsia-600 text-white py-20">
           <div className="absolute inset-0 bg-black/20" />
@@ -198,30 +53,32 @@ const Rewards = () => {
               <Button
                 size="lg"
                 className="bg-white text-purple-600 hover:bg-gray-100 rounded-full px-8 text-lg"
-                asChild
+                onClick={() => window.open(WIX_LOYALTY_URL, '_blank')}
               >
-                <Link to="/auth">Join Free Today</Link>
+                <ExternalLink className="w-5 h-5 mr-2" />
+                Access Your Rewards
               </Button>
             </div>
           </div>
         </section>
 
-        {/* Stats Section */}
+        {/* Info Section */}
         <section className="py-12 bg-secondary/30">
           <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-3 gap-8 text-center">
-              <div>
-                <p className="text-4xl font-bold text-primary mb-2">1M+</p>
-                <p className="text-muted-foreground">Happy Members</p>
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-primary mb-2">$10M+</p>
-                <p className="text-muted-foreground">Rewards Redeemed</p>
-              </div>
-              <div>
-                <p className="text-4xl font-bold text-primary mb-2">Free</p>
-                <p className="text-muted-foreground">To Join & Use</p>
-              </div>
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl font-bold mb-4">Manage Your Loyalty Rewards</h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                Your rewards and points are managed through our customer portal. 
+                Access your account to view your points balance, redeem rewards, and track your membership tier.
+              </p>
+              <Button
+                size="lg"
+                onClick={() => window.open(WIX_LOYALTY_URL, '_blank')}
+                className="rounded-full px-8"
+              >
+                <ExternalLink className="w-5 h-5 mr-2" />
+                Go to Rewards Portal
+              </Button>
             </div>
           </div>
         </section>
@@ -230,7 +87,7 @@ const Rewards = () => {
         <section className="py-16 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4">How It Works</h2>
+              <h2 className="text-4xl font-bold mb-4">Rewards Program Benefits</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Start earning rewards with every purchase and unlock exclusive perks
               </p>
@@ -258,91 +115,21 @@ const Rewards = () => {
           </div>
         </section>
 
-        {/* Points Value */}
-        <section className="py-16 bg-gradient-to-b from-pink-50 to-purple-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4">Your Points = Real Savings</h2>
-              <p className="text-lg text-muted-foreground">
-                Redeem your points anytime for instant discounts
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-5xl mx-auto">
-              {redemptionTiers.map((tier, index) => (
-                <div
-                  key={index}
-                  className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${tier.bgColor} p-6 text-center shadow-md hover:shadow-lg transition-all hover:-translate-y-1`}
-                >
-                  <div className="text-4xl font-bold text-gray-900 mb-2">
-                    {tier.value}
-                  </div>
-                  <div className="text-sm font-medium text-gray-700">
-                    {tier.points} points
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Membership Tiers */}
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4">Membership Levels</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                The more you shop, the more you earn. Rise through the tiers and unlock exclusive benefits
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {membershipTiers.map((tier, index) => {
-                const Icon = tier.icon;
-                return (
-                  <Card
-                    key={index}
-                    className={`${tier.bgColor} ${tier.borderColor} border-2 overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1`}
-                  >
-                    <div className="p-6">
-                      <div className={`inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-4 shadow-md`}>
-                        <Icon className={`w-8 h-8 ${tier.color}`} />
-                      </div>
-                      <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
-                      <Badge variant="outline" className="mb-4">
-                        {tier.requirement}
-                      </Badge>
-                      
-                      <ul className="space-y-3">
-                        {tier.benefits.map((benefit, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-sm">
-                            <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                            <span>{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
         <section className="py-16 bg-gradient-to-r from-pink-500 via-purple-500 to-fuchsia-600 text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl font-bold mb-4">Ready to Start Earning?</h2>
+            <h2 className="text-4xl font-bold mb-4">Ready to Access Your Rewards?</h2>
             <p className="text-xl mb-8 text-white/90 max-w-2xl mx-auto">
-              Join Beauty Vault Rewards today and start earning points on your next purchase
+              View your points balance, redeem rewards, and unlock exclusive member benefits
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
                 className="bg-white text-purple-600 hover:bg-gray-100 rounded-full px-8"
-                asChild
+                onClick={() => window.open(WIX_LOYALTY_URL, '_blank')}
               >
-                <Link to="/auth">Sign Up Free</Link>
+                <ExternalLink className="w-5 h-5 mr-2" />
+                Access Rewards Portal
               </Button>
               <Button
                 size="lg"
