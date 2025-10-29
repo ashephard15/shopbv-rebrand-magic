@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,22 +9,35 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2, AlertTriangle } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const CartDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasInvalidItems, setHasInvalidItems] = useState(false);
   const { 
     items, 
     isLoading, 
     updateQuantity, 
     removeItem, 
-    createCheckout 
+    createCheckout,
+    clearCart 
   } = useCartStore();
   
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
+
+  // Check for invalid items on mount and when items change
+  useEffect(() => {
+    const invalidItems = items.filter(item => !item.wixId);
+    setHasInvalidItems(invalidItems.length > 0);
+    
+    if (invalidItems.length > 0) {
+      console.error('Cart contains invalid items without wixId:', invalidItems);
+    }
+  }, [items]);
 
   const handleCheckout = async () => {
     try {
@@ -88,6 +101,28 @@ export const CartDrawer = () => {
             </div>
           ) : (
             <>
+              {hasInvalidItems && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="flex items-center justify-between">
+                    <span className="text-sm">Cart contains outdated items</span>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        clearCart();
+                        toast.success('Cart cleared', {
+                          description: 'Please re-add products from the products page.',
+                        });
+                        setIsOpen(false);
+                      }}
+                    >
+                      Clear Cart
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <div className="flex-1 overflow-y-auto pr-2 min-h-0">
                 <div className="space-y-4">
                   {items.map((item) => (
