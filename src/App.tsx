@@ -1,49 +1,23 @@
-import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
-import FragranceQuiz from "./pages/FragranceQuiz";
+import Auth from "./pages/Auth";
 import Rewards from "./pages/Rewards";
-import SyncProducts from "./pages/SyncProducts";
+import NotFound from "./pages/NotFound";
 import ImportCSV from "./pages/ImportCSV";
 import ExportProducts from "./pages/ExportProducts";
-import NotFound from "./pages/NotFound";
-import Auth from "./pages/Auth";
+import SyncProducts from "./pages/SyncProducts";
+import FragranceQuiz from "./pages/FragranceQuiz";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  // CRITICAL FIX: Clear corrupted cart data immediately on app load
-  useEffect(() => {
-    try {
-      const cartData = localStorage.getItem('wix-cart');
-      if (cartData) {
-        const parsed = JSON.parse(cartData);
-        const items = parsed?.state?.items || [];
-        
-        // Check if any items are missing wixId
-        const hasInvalidItems = items.some((item: any) => !item.wixId);
-        
-        if (hasInvalidItems) {
-          console.warn('⚠️ CLEARING CORRUPTED CART DATA - Items missing wixId');
-          localStorage.removeItem('wix-cart');
-          // Force reload to reinitialize store
-          window.location.reload();
-        }
-      }
-    } catch (error) {
-      console.error('Error checking cart, clearing storage:', error);
-      localStorage.removeItem('wix-cart');
-    }
-  }, []);
-
-  return (
+const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -82,7 +56,6 @@ const App = () => {
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-  );
-};
+);
 
 export default App;
