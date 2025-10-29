@@ -40,6 +40,12 @@ export const useCartStore = create<CartStore>()(
       isLoading: false,
 
       addItem: (item) => {
+        // Validate that item has wixId before adding
+        if (!item.wixId) {
+          console.error('Attempted to add item without wixId:', item);
+          throw new Error('Product is not available for checkout');
+        }
+        
         const { items } = get();
         const existingItem = items.find(i => i.productId === item.productId);
         
@@ -94,14 +100,16 @@ export const useCartStore = create<CartStore>()(
       setLoading: (isLoading) => set({ isLoading }),
 
       createCheckout: async () => {
-        const { items, setLoading, setCheckoutUrl } = get();
+        const { items, setLoading, setCheckoutUrl, clearCart } = get();
         if (items.length === 0) return;
 
-        // Check if all items have wix_id
+        // Check if all items have wix_id and clean up old items
         const itemsWithoutWixId = items.filter(item => !item.wixId);
         if (itemsWithoutWixId.length > 0) {
-          console.error('Items without wix_id:', itemsWithoutWixId);
-          throw new Error('Some products are not available for checkout. Please refresh and try again.');
+          console.error('Found items without wix_id (likely old cart data):', itemsWithoutWixId);
+          // Clear old cart data
+          clearCart();
+          throw new Error('Your cart contained outdated items. Please add products again.');
         }
 
         console.log('Creating checkout with items:', items);
