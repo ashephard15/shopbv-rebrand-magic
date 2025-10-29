@@ -28,10 +28,15 @@ export const CartDrawer = () => {
 
   const handleCheckout = async () => {
     try {
-      console.log('Starting checkout process...');
+      console.log('=== STARTING CHECKOUT ===');
+      console.log('Cart items:', items);
+      console.log('Total items:', totalItems);
+      
       await createCheckout();
+      
       const checkoutUrl = useCartStore.getState().checkoutUrl;
-      console.log('Checkout URL:', checkoutUrl);
+      console.log('=== CHECKOUT URL RECEIVED ===', checkoutUrl);
+      
       if (checkoutUrl) {
         toast.info('Opening checkout...', {
           description: 'Complete your purchase in the new tab.',
@@ -39,9 +44,11 @@ export const CartDrawer = () => {
         });
         window.open(checkoutUrl, '_blank');
         setIsOpen(false);
+      } else {
+        throw new Error('No checkout URL was returned. Please try again.');
       }
     } catch (error) {
-      console.error('Checkout failed:', error);
+      console.error('=== CHECKOUT ERROR ===', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to create checkout. Please try again.';
       toast.error('Checkout Failed', {
         description: errorMessage,
