@@ -100,39 +100,12 @@ serve(async (req) => {
     const checkoutId = checkoutData.checkout.id;
     console.log('Checkout created with ID:', checkoutId);
 
-    // Step 2: Get the proper checkout URL using the Get Checkout URL endpoint
-    const checkoutUrlResponse = await fetch(
-      `https://www.wixapis.com/ecom/v1/checkouts/${checkoutId}/checkout-url`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': WIX_API_KEY!,
-          'Content-Type': 'application/json',
-          'wix-site-id': WIX_SITE_ID!,
-        }
-      }
-    );
-
-    if (!checkoutUrlResponse.ok) {
-      const errorText = await checkoutUrlResponse.text();
-      console.error('Wix get checkout URL error:', checkoutUrlResponse.status, errorText);
-      throw new Error(`Failed to get checkout URL: ${checkoutUrlResponse.status} - ${errorText}`);
-    }
-
-    const urlData = await checkoutUrlResponse.json();
-    let checkoutUrl = urlData.checkoutUrl;
+    // Step 2: Use Wix's hosted checkout by constructing the URL directly
+    // This ensures checkout happens on Wix's domain, not the custom domain
+    const wixSiteSlug = WIX_SITE_ID!; // Using site ID as the slug
+    const checkoutUrl = `https://manage.wix.com/ecommerce/checkout/${checkoutId}?siteId=${WIX_SITE_ID}`;
     
-    if (!checkoutUrl) {
-      console.error('No checkout URL in response:', urlData);
-      throw new Error('Wix did not return a checkout URL');
-    }
-    
-    // Add channel parameter to prevent password protection
-    const url = new URL(checkoutUrl);
-    url.searchParams.set('channel', 'online_store');
-    checkoutUrl = url.toString();
-    
-    console.log('Successfully retrieved checkout URL:', checkoutUrl);
+    console.log('Successfully created Wix hosted checkout URL:', checkoutUrl);
 
     return new Response(JSON.stringify({ 
       checkout: {
