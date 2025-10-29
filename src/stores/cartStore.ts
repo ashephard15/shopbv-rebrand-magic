@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { createWixCheckout, WixProduct } from '@/lib/wix';
+import { toast } from 'sonner';
 
 export interface CartItem {
   product: WixProduct;
@@ -136,6 +137,26 @@ export const useCartStore = create<CartStore>()(
     {
       name: 'wix-cart',
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        // Clean up any cart items without wixId after loading from storage
+        if (state && state.items) {
+          const validItems = state.items.filter(item => item.wixId);
+          const removedCount = state.items.length - validItems.length;
+          
+          if (removedCount > 0) {
+            console.log(`Cleaned up ${removedCount} invalid cart items without wixId`);
+            state.items = validItems;
+            
+            // Show toast notification to user
+            setTimeout(() => {
+              toast.warning('Cart Updated', {
+                description: `${removedCount} outdated item(s) were removed from your cart. Please re-add your products.`,
+                duration: 6000,
+              });
+            }, 500);
+          }
+        }
+      }
     }
   )
 );
