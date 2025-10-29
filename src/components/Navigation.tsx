@@ -1,4 +1,4 @@
-import { Search, User, Menu, LogOut, Settings, Upload, Download } from "lucide-react";
+import { Search, User, Menu, LogOut, Settings, Upload, Download, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import logo from "@/assets/beauty-vault-logo.png";
@@ -117,6 +117,12 @@ const Navigation = () => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
+                      <Link to="/orders" className="cursor-pointer">
+                        <Package className="mr-2 h-4 w-4" />
+                        My Orders
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link to="/rewards" className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
                         My Rewards
@@ -167,6 +173,9 @@ const Navigation = () => {
             </Link>
             <Link to="/products" className="text-sm font-medium hover:text-primary transition-colors">
               Shop
+            </Link>
+            <Link to="/orders" className="text-sm font-medium hover:text-primary transition-colors">
+              Orders
             </Link>
             <Link to="/rewards" className="text-sm font-medium hover:text-primary transition-colors">
               Rewards

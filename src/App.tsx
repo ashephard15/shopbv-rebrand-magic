@@ -8,6 +8,7 @@ import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Auth from "./pages/Auth";
 import Rewards from "./pages/Rewards";
+import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
 import ImportCSV from "./pages/ImportCSV";
 import ExportProducts from "./pages/ExportProducts";
@@ -29,6 +30,11 @@ const App = () => (
           <Route path="/products/:handle" element={<ProductDetail />} />
           <Route path="/product/:handle" element={<ProductDetail />} />
           <Route path="/fragrance-quiz" element={<FragranceQuiz />} />
+          <Route path="/orders" element={
+            <ProtectedRoute>
+              <Orders />
+            </ProtectedRoute>
+          } />
           <Route path="/rewards" element={
             <ProtectedRoute>
               <Rewards />
