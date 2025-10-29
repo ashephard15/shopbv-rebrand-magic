@@ -6,7 +6,8 @@ import { Sparkles, Gift, Heart, ShoppingBag, Zap, ExternalLink } from "lucide-re
 import { Link } from "react-router-dom";
 
 const Rewards = () => {
-  const WIX_LOYALTY_URL = "https://manage.wix.com/dashboard/9b424666-ec32-41d3-84d6-c831a2637239/loyalty";
+  // Update this URL to your Wix site's members area
+  const WIX_MEMBERS_URL = "https://www.beautyvaultboutique.com/account/my-account";
 
   const benefits = [
     {
@@ -53,7 +54,7 @@ const Rewards = () => {
               <Button
                 size="lg"
                 className="bg-white text-purple-600 hover:bg-gray-100 rounded-full px-8 text-lg"
-                onClick={() => window.open(WIX_LOYALTY_URL, '_blank')}
+                onClick={() => window.open(WIX_MEMBERS_URL, '_blank')}
               >
                 <ExternalLink className="w-5 h-5 mr-2" />
                 Access Your Rewards
@@ -68,16 +69,16 @@ const Rewards = () => {
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold mb-4">Manage Your Loyalty Rewards</h2>
               <p className="text-lg text-muted-foreground mb-6">
-                Your rewards and points are managed through our customer portal. 
-                Access your account to view your points balance, redeem rewards, and track your membership tier.
+                Your rewards and points are managed through your Wix members area. 
+                Log in to view your points balance, redeem rewards, and track your membership tier.
               </p>
               <Button
                 size="lg"
-                onClick={() => window.open(WIX_LOYALTY_URL, '_blank')}
+                onClick={() => window.open(WIX_MEMBERS_URL, '_blank')}
                 className="rounded-full px-8"
               >
                 <ExternalLink className="w-5 h-5 mr-2" />
-                Go to Rewards Portal
+                Go to Members Area
               </Button>
             </div>
           </div>
@@ -126,10 +127,10 @@ const Rewards = () => {
               <Button
                 size="lg"
                 className="bg-white text-purple-600 hover:bg-gray-100 rounded-full px-8"
-                onClick={() => window.open(WIX_LOYALTY_URL, '_blank')}
+                onClick={() => window.open(WIX_MEMBERS_URL, '_blank')}
               >
                 <ExternalLink className="w-5 h-5 mr-2" />
-                Access Rewards Portal
+                Access Members Area
               </Button>
               <Button
                 size="lg"
