@@ -85,7 +85,17 @@ serve(async (req) => {
             },
             quantity: item.quantity
           })),
-          channelType: 'WEB'
+          channelType: 'WEB',
+          customizations: {
+            css: `
+              /* Hide the continue browsing link */
+              [data-hook="continue-shopping-link"],
+              .continue-shopping,
+              a[href*="continue"] {
+                display: none !important;
+              }
+            `
+          }
         })
       }
     );
