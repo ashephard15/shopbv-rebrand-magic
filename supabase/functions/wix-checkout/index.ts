@@ -66,6 +66,11 @@ serve(async (req) => {
     const { items } = body;
     console.log('Creating Wix checkout for items:', items);
 
+    // Get the origin URL from the request header
+    const origin = req.headers.get('origin') || 'https://goshopbv.com';
+    const successUrl = `${origin}/orders?status=success`;
+    const cancelUrl = `${origin}/products`;
+
     // Step 1: Create checkout with line items
     const checkoutResponse = await fetch(
       `https://www.wixapis.com/ecom/v1/checkouts`,
@@ -85,7 +90,13 @@ serve(async (req) => {
             },
             quantity: item.quantity
           })),
-          channelType: 'WEB'
+          channelType: 'WEB',
+          customFields: {
+            returnUrls: {
+              thankYouPageUrl: successUrl,
+              cartPageUrl: cancelUrl
+            }
+          }
         })
       }
     );
