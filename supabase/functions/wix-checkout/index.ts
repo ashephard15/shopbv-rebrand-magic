@@ -100,34 +100,11 @@ serve(async (req) => {
     const checkoutId = checkoutData.checkout.id;
     console.log('Checkout created with ID:', checkoutId);
 
-    // Step 2: Get the checkout URL from Wix API
-    const checkoutUrlResponse = await fetch(
-      `https://www.wixapis.com/ecom/v1/checkouts/${checkoutId}/checkout-url`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': WIX_API_KEY!,
-          'Content-Type': 'application/json',
-          'wix-site-id': WIX_SITE_ID!,
-        }
-      }
-    );
-
-    if (!checkoutUrlResponse.ok) {
-      const errorText = await checkoutUrlResponse.text();
-      console.error('Wix get checkout URL error:', checkoutUrlResponse.status, errorText);
-      throw new Error(`Failed to get checkout URL: ${checkoutUrlResponse.status} - ${errorText}`);
-    }
-
-    const urlData = await checkoutUrlResponse.json();
-    let checkoutUrl = urlData.checkoutUrl;
+    // Construct the checkout URL directly using the checkout ID
+    // This avoids the need for a configured checkout page in Wix
+    const checkoutUrl = `https://www.wix.com/checkout/start/${checkoutId}?appSectionParams={"siteRevision":null}`;
     
-    if (!checkoutUrl) {
-      console.error('No checkout URL in response:', urlData);
-      throw new Error('Wix did not return a checkout URL');
-    }
-    
-    console.log('Final checkout URL from Wix:', checkoutUrl);
+    console.log('Constructed checkout URL:', checkoutUrl);
 
     return new Response(JSON.stringify({ 
       checkout: {
