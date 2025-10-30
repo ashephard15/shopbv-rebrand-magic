@@ -45,9 +45,7 @@ export const CartDrawer = () => {
       console.log('Cart items:', items);
       console.log('Total items:', totalItems);
       
-      await createCheckout();
-      
-      const checkoutUrl = useCartStore.getState().checkoutUrl;
+      const checkoutUrl = await createCheckout();
       console.log('=== CHECKOUT URL RECEIVED ===', checkoutUrl);
       
       if (checkoutUrl) {

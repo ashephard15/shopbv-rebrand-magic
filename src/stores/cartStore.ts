@@ -29,7 +29,7 @@ interface CartStore {
   setCartId: (cartId: string) => void;
   setCheckoutUrl: (url: string) => void;
   setLoading: (loading: boolean) => void;
-  createCheckout: () => Promise<void>;
+  createCheckout: () => Promise<string | undefined>;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -96,53 +96,59 @@ export const useCartStore = create<CartStore>()(
         set({ items: [], cartId: null, checkoutUrl: null });
       },
 
-      setCartId: (cartId) => set({ cartId }),
-      setCheckoutUrl: (checkoutUrl) => set({ checkoutUrl }),
-      setLoading: (isLoading) => set({ isLoading }),
+  setCartId: (cartId) => set({ cartId }),
+  setCheckoutUrl: (checkoutUrl) => set({ checkoutUrl }),
+  setLoading: (isLoading) => set({ isLoading }),
 
-      createCheckout: async () => {
-        const { items, setLoading, setCheckoutUrl, clearCart } = get();
-        if (items.length === 0) return;
+  createCheckout: async () => {
+    const { items, setLoading, clearCart } = get();
+    if (items.length === 0) return;
 
-        // Check if all items have wix_id and clean up old items
-        const itemsWithoutWixId = items.filter(item => !item.wixId);
-        if (itemsWithoutWixId.length > 0) {
-          console.error('Found items without wix_id (likely old cart data):', itemsWithoutWixId);
-          // Clear old cart data
-          clearCart();
-          throw new Error('Your cart contained outdated items. Please add products again.');
-        }
+    // Check if all items have wix_id and clean up old items
+    const itemsWithoutWixId = items.filter(item => !item.wixId);
+    if (itemsWithoutWixId.length > 0) {
+      console.error('Found items without wix_id (likely old cart data):', itemsWithoutWixId);
+      // Clear old cart data
+      clearCart();
+      throw new Error('Your cart contained outdated items. Please add products again.');
+    }
 
-        console.log('Creating checkout with items:', items);
-        setLoading(true);
-        try {
-          const wixItems = items.map(item => ({
-            productId: item.wixId!,
-            quantity: item.quantity,
-            options: item.selectedOptions
-          }));
-          
-          console.log('Calling createWixCheckout with:', wixItems);
-          const checkoutUrl = await createWixCheckout(wixItems);
-          console.log('Received checkout URL:', checkoutUrl);
-          setCheckoutUrl(checkoutUrl);
-          
-          // Clear cart after successful checkout creation
-          clearCart();
-          
-          toast.success('Redirecting to checkout...', {
-            description: 'Your cart has been cleared'
-          });
-        } catch (error) {
-          console.error('Failed to create Wix checkout:', error);
-          toast.error('Checkout failed', {
-            description: error instanceof Error ? error.message : 'Please try again'
-          });
-          throw error;
-        } finally {
-          setLoading(false);
-        }
+    console.log('Creating checkout with items:', items);
+    setLoading(true);
+    try {
+      const wixItems = items.map(item => ({
+        productId: item.wixId!,
+        quantity: item.quantity,
+        options: item.selectedOptions
+      }));
+      
+      console.log('Calling createWixCheckout with:', wixItems);
+      const checkoutUrl = await createWixCheckout(wixItems);
+      console.log('Received checkout URL:', checkoutUrl);
+      
+      if (!checkoutUrl) {
+        throw new Error('No checkout URL returned from Wix');
       }
+      
+      // Clear cart after successful checkout creation
+      clearCart();
+      
+      toast.success('Redirecting to checkout...', {
+        description: 'Your cart has been cleared'
+      });
+      
+      // Return the URL so it can be used immediately
+      return checkoutUrl;
+    } catch (error) {
+      console.error('Failed to create Wix checkout:', error);
+      toast.error('Checkout failed', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }
     }),
     {
       name: 'wix-cart',
