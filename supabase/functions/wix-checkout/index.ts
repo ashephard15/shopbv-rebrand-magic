@@ -120,14 +120,22 @@ serve(async (req) => {
     }
 
     const urlData = await checkoutUrlResponse.json();
-    const checkoutUrl = urlData.checkoutUrl;
+    console.log('Checkout URL API response:', urlData);
+    
+    // Try both snake_case (API standard) and camelCase
+    const checkoutUrl = urlData.checkout_url || urlData.checkoutUrl;
     
     if (!checkoutUrl) {
-      console.error('No checkout URL in response:', urlData);
-      throw new Error('Wix did not return a checkout URL');
+      console.error('No checkout URL in response:', JSON.stringify(urlData));
+      throw new Error('Wix did not return a checkout URL. Response: ' + JSON.stringify(urlData));
     }
     
     console.log('Final checkout URL from Wix:', checkoutUrl);
+    
+    // Validate that we have a proper checkout URL (should point to actual Wix site, not generic wix.com)
+    if (checkoutUrl.includes('www.wix.com/checkout/start')) {
+      console.warn('Warning: Checkout URL is generic Wix URL. This may indicate the site does not have a configured checkout page.');
+    }
 
     return new Response(JSON.stringify({ 
       checkout: {
