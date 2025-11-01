@@ -99,43 +99,47 @@ serve(async (req) => {
     const checkoutData = await checkoutResponse.json();
     const checkoutId = checkoutData.checkout.id;
     console.log('Checkout created with ID:', checkoutId);
+    console.log('Full checkout response:', JSON.stringify(checkoutData, null, 2));
 
-    // Step 2: Get the checkout URL from Wix API
-    const checkoutUrlResponse = await fetch(
-      `https://www.wixapis.com/ecom/v1/checkouts/${checkoutId}/checkout-url`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': WIX_API_KEY!,
-          'Content-Type': 'application/json',
-          'wix-site-id': WIX_SITE_ID!,
+    // The checkout URL should be included in the create response
+    // Try both possible field names
+    let checkoutUrl = checkoutData.checkout.checkoutUrl || 
+                     checkoutData.checkout.checkout_url ||
+                     checkoutData.checkoutUrl ||
+                     checkoutData.checkout_url;
+
+    // If not in the create response, fetch it separately
+    if (!checkoutUrl) {
+      console.log('CheckoutUrl not in create response, fetching separately...');
+      const checkoutUrlResponse = await fetch(
+        `https://www.wixapis.com/ecom/v1/checkouts/${checkoutId}/checkout-url`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': WIX_API_KEY!,
+            'Content-Type': 'application/json',
+            'wix-site-id': WIX_SITE_ID!,
+          }
         }
+      );
+
+      if (!checkoutUrlResponse.ok) {
+        const errorText = await checkoutUrlResponse.text();
+        console.error('Wix get checkout URL error:', checkoutUrlResponse.status, errorText);
+        throw new Error(`Failed to get checkout URL: ${checkoutUrlResponse.status} - ${errorText}`);
       }
-    );
 
-    if (!checkoutUrlResponse.ok) {
-      const errorText = await checkoutUrlResponse.text();
-      console.error('Wix get checkout URL error:', checkoutUrlResponse.status, errorText);
-      throw new Error(`Failed to get checkout URL: ${checkoutUrlResponse.status} - ${errorText}`);
+      const urlData = await checkoutUrlResponse.json();
+      console.log('Checkout URL API response:', JSON.stringify(urlData, null, 2));
+      checkoutUrl = urlData.checkout_url || urlData.checkoutUrl;
     }
-
-    const urlData = await checkoutUrlResponse.json();
-    console.log('Checkout URL API response:', urlData);
-    
-    // Try both snake_case (API standard) and camelCase
-    const checkoutUrl = urlData.checkout_url || urlData.checkoutUrl;
     
     if (!checkoutUrl) {
-      console.error('No checkout URL in response:', JSON.stringify(urlData));
-      throw new Error('Wix did not return a checkout URL. Response: ' + JSON.stringify(urlData));
+      console.error('No checkout URL found in any response');
+      throw new Error('Wix did not return a checkout URL');
     }
     
-    console.log('Final checkout URL from Wix:', checkoutUrl);
-    
-    // Validate that we have a proper checkout URL (should point to actual Wix site, not generic wix.com)
-    if (checkoutUrl.includes('www.wix.com/checkout/start')) {
-      console.warn('Warning: Checkout URL is generic Wix URL. This may indicate the site does not have a configured checkout page.');
-    }
+    console.log('Final checkout URL:', checkoutUrl);
 
     return new Response(JSON.stringify({ 
       checkout: {
