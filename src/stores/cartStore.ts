@@ -130,11 +130,10 @@ export const useCartStore = create<CartStore>()(
         throw new Error('No checkout URL returned from Wix');
       }
       
-      // Clear cart after successful checkout creation
-      clearCart();
-      
+      // Don't clear cart immediately - Wix needs the items to be available
+      // Cart will be cleared when user returns from successful checkout
       toast.success('Redirecting to checkout...', {
-        description: 'Your cart has been cleared'
+        description: 'Opening Wix checkout page'
       });
       
       // Return the URL so it can be used immediately
