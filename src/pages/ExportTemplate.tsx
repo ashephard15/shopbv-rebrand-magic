@@ -95,23 +95,41 @@ const ExportTemplate = () => {
           </Button>
         </div>
 
+        <div className="bg-card p-6 rounded-lg border mb-6">
+          <h2 className="text-xl font-semibold mb-4">Database Field Mapping</h2>
+          <p className="text-sm text-muted-foreground mb-3">
+            When importing products, map your database fields to Wix fields as follows:
+          </p>
+          <div className="space-y-2 text-sm bg-muted p-4 rounded">
+            <div><code className="text-xs">slug</code> → <strong>handleId</strong> (max 50 chars)</div>
+            <div><code className="text-xs">name</code> → <strong>name</strong></div>
+            <div><code className="text-xs">description</code> → <strong>description</strong></div>
+            <div><code className="text-xs">image_url</code> → <strong>productImageUrl</strong></div>
+            <div><code className="text-xs">category</code> → <strong>collection</strong></div>
+            <div><code className="text-xs">price</code> → <strong>price</strong></div>
+            <div><code className="text-xs">compare_at_price</code> → calculate <strong>discountValue</strong></div>
+            <div><code className="text-xs">in_stock</code> (true/false) → <strong>inventory</strong> (InStock/OutOfStock)</div>
+            <div><code className="text-xs">brand</code> → <strong>brand</strong></div>
+          </div>
+        </div>
+
         <div className="bg-card p-6 rounded-lg border">
-          <h2 className="text-xl font-semibold mb-4">Key Wix Template Fields</h2>
+          <h2 className="text-xl font-semibold mb-4">Required Wix Fields</h2>
           <div className="space-y-2 text-sm">
-            <div><strong>handleId</strong> - Unique product identifier (max 50 chars, URL-friendly, e.g., "luxury-face-serum")</div>
-            <div><strong>fieldType</strong> - Always "Product" for product rows</div>
+            <div><strong>handleId</strong> - Unique identifier, max 50 characters, URL-friendly (a-z, 0-9, hyphens only)</div>
+            <div><strong>fieldType</strong> - Must be "Product" for all product rows</div>
             <div><strong>name</strong> - Product name (required)</div>
-            <div><strong>description</strong> - Product description</div>
-            <div><strong>productImageUrl</strong> - Full URL to product image</div>
-            <div><strong>collection</strong> - Product category/collection (e.g., "Skincare", "Makeup")</div>
-            <div><strong>price</strong> - Product price (required, number only)</div>
-            <div><strong>visible</strong> - TRUE or FALSE (show/hide product)</div>
-            <div><strong>discountMode</strong> - AMOUNT or PERCENT (leave empty for no discount)</div>
-            <div><strong>discountValue</strong> - Discount amount or percentage</div>
-            <div><strong>inventory</strong> - InStock or OutOfStock</div>
-            <div><strong>brand</strong> - Brand name</div>
-            <div className="mt-4 p-3 bg-muted rounded">
-              <strong>Note:</strong> The template includes additional fields for product options, additional info, and custom text fields. Leave these empty if not needed.
+            <div><strong>price</strong> - Numeric price (required, no currency symbols)</div>
+            <div><strong>visible</strong> - Must be "TRUE" or "FALSE" (all caps)</div>
+            <div><strong>inventory</strong> - Must be "InStock" or "OutOfStock" (exact capitalization)</div>
+            <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded">
+              <strong>⚠️ Validation Rules:</strong>
+              <ul className="mt-2 space-y-1 ml-4 list-disc">
+                <li>handleId must not exceed 50 characters or import will fail</li>
+                <li>discountMode must be "AMOUNT" or "PERCENT" (or empty for no discount)</li>
+                <li>All TRUE/FALSE values must be uppercase</li>
+                <li>inventory values are case-sensitive</li>
+              </ul>
             </div>
           </div>
         </div>
