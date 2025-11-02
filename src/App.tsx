@@ -12,6 +12,7 @@ import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
 import ImportCSV from "./pages/ImportCSV";
 import ExportProducts from "./pages/ExportProducts";
+import ExportTemplate from "./pages/ExportTemplate";
 import SyncProducts from "./pages/SyncProducts";
 import FragranceQuiz from "./pages/FragranceQuiz";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -53,6 +54,11 @@ const App = () => (
           <Route path="/export-products" element={
             <ProtectedRoute requireAdmin>
               <ExportProducts />
+            </ProtectedRoute>
+          } />
+          <Route path="/export-template" element={
+            <ProtectedRoute requireAdmin>
+              <ExportTemplate />
             </ProtectedRoute>
           } />
           <Route path="/auth" element={<Auth />} />
